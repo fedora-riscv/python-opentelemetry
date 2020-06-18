@@ -1,0 +1,36 @@
+diff -up ./ext/opentelemetry-ext-grpc/setup.cfg.orig ./ext/opentelemetry-ext-grpc/setup.cfg
+--- ./ext/opentelemetry-ext-grpc/setup.cfg.orig	2020-05-28 00:01:25.000000000 +0200
++++ ./ext/opentelemetry-ext-grpc/setup.cfg	2020-06-16 00:43:49.473406328 +0200
+@@ -41,7 +41,7 @@ package_dir=
+ packages=find_namespace:
+ install_requires =
+     opentelemetry-api == 0.8b0
+-    grpcio ~= 1.27
++    grpcio
+ 
+ [options.extras_require]
+ test =
+diff -up ./ext/opentelemetry-ext-psycopg2/setup.cfg.orig ./ext/opentelemetry-ext-psycopg2/setup.cfg
+--- ./ext/opentelemetry-ext-psycopg2/setup.cfg.orig	2020-05-28 00:01:25.000000000 +0200
++++ ./ext/opentelemetry-ext-psycopg2/setup.cfg	2020-06-16 00:36:18.692531417 +0200
+@@ -43,7 +43,7 @@ install_requires =
+     opentelemetry-api == 0.8b0
+     opentelemetry-ext-dbapi == 0.8b0
+     opentelemetry-auto-instrumentation == 0.8b0
+-    psycopg2-binary >= 2.7.3.1
++    psycopg2 >= 2.7.3.1
+     wrapt >= 1.0.0, < 2.0.0
+ 
+ [options.extras_require]
+diff -up ./ext/opentelemetry-ext-redis/setup.cfg.orig ./ext/opentelemetry-ext-redis/setup.cfg
+--- ./ext/opentelemetry-ext-redis/setup.cfg.orig	2020-05-28 00:01:25.000000000 +0200
++++ ./ext/opentelemetry-ext-redis/setup.cfg	2020-06-16 00:44:40.056163347 +0200
+@@ -43,7 +43,7 @@ install_requires =
+     opentelemetry-api == 0.8b0
+     opentelemetry-auto-instrumentation == 0.8b0
+     redis >= 2.6
+-    wrapt >= 1.12.1
++    wrapt
+ 
+ [options.extras_require]
+ test =
