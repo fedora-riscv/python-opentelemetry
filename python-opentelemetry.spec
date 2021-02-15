@@ -3,7 +3,7 @@
 
 Name:           python-%{srcname}
 Version:        0.8.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The OpenTelemetry Python client
 
 License:        ASL 2.0
@@ -12,7 +12,6 @@ Source0:        %{url}/archive/v%{version}/%{srcname}-%{version}.tar.gz
 # Fix Python requirement versions
 Patch0:         %{name}-0.8.0-requirements.patch
 
-BuildRequires: make
 BuildRequires:  python3-devel
 BuildRequires:  %{py3_dist setuptools}
 # Required for tests
@@ -37,7 +36,7 @@ BuildRequires:  %{py3_dist sqlalchemy}
 BuildRequires:  %{py3_dist thrift}
 BuildRequires:  %{py3_dist wrapt}
 # Required for documentation
-BuildRequires:  fontpackages-devel
+BuildRequires:  make
 BuildRequires:  %{py3_dist sphinx}
 BuildRequires:  %{py3_dist sphinx-autodoc-typehints}
 BuildRequires:  %{py3_dist sphinx-rtd-theme}
@@ -49,7 +48,7 @@ BuildArch:      noarch
 
 %package -n python3-%{srcname}-api
 Summary:        OpenTelemetry Python API
-%{?python_provide:%python_provide python3-%{srcname}-api}
+%py_provides python3-%{srcname}-api
 
 %description -n python3-%{srcname}-api
 %{_description}
@@ -57,7 +56,7 @@ Summary:        OpenTelemetry Python API
 
 %package -n python3-%{srcname}-auto-instrumentation
 Summary:        OpenTelemetry Auto Instrumentation
-%{?python_provide:%python_provide python3-%{srcname}-auto-instrumentation}
+%py_provides python3-%{srcname}-auto-instrumentation
 
 %description -n python3-%{srcname}-auto-instrumentation
 %{summary}.
@@ -65,7 +64,7 @@ Summary:        OpenTelemetry Auto Instrumentation
 
 %package -n python3-%{srcname}-sdk
 Summary:        OpenTelemetry Python SDK
-%{?python_provide:%python_provide python3-%{srcname}-sdk}
+%py_provides python3-%{srcname}-sdk
 
 %description -n python3-%{srcname}-sdk
 %{summary}.
@@ -73,7 +72,7 @@ Summary:        OpenTelemetry Python SDK
 
 %package -n python3-%{srcname}-ext-aiohttp-client
 Summary:        OpenTelemetry aiohttp client Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-aiohttp-client}
+%py_provides python3-%{srcname}-ext-aiohttp-client
 
 %description -n python3-%{srcname}-ext-aiohttp-client
 This library allows tracing HTTP requests made by the aiohttp client library.
@@ -81,7 +80,7 @@ This library allows tracing HTTP requests made by the aiohttp client library.
 
 %package -n python3-%{srcname}-ext-asgi
 Summary:        OpenTelemetry ASGI Middleware
-%{?python_provide:%python_provide python3-%{srcname}-ext-asgi}
+%py_provides python3-%{srcname}-ext-asgi
 
 %description -n python3-%{srcname}-ext-asgi
 This library provides a ASGI middleware that can be used on any ASGI framework
@@ -91,7 +90,7 @@ OpenTelemetry.
 
 # %%package -n python3-%%{srcname}-ext-datadog
 # Summary:        OpenTelemetry Datadog Exporter
-# %%{?python_provide:%%python_provide python3-%%{srcname}-ext-datadog}
+# %%py_provides python3-%%{srcname}-ext-datadog
 
 # %%description -n python3-%%{srcname}-ext-datadog
 # This library allows to export tracing data to Datadog. OpenTelemetry span event
@@ -100,7 +99,7 @@ OpenTelemetry.
 
 %package -n python3-%{srcname}-ext-dbapi
 Summary:        OpenTelemetry Database API integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-dbapi}
+%py_provides python3-%{srcname}-ext-dbapi
 
 %description -n python3-%{srcname}-ext-dbapi
 %{summary}.
@@ -108,7 +107,7 @@ Summary:        OpenTelemetry Database API integration
 
 %package -n python3-%{srcname}-ext-django
 Summary:        OpenTelemetry Django Tracing
-%{?python_provide:%python_provide python3-%{srcname}-ext-django}
+%py_provides python3-%{srcname}-ext-django
 
 %description -n python3-%{srcname}-ext-django
 This library allows tracing requests for Django applications.
@@ -116,7 +115,7 @@ This library allows tracing requests for Django applications.
 
 %package -n python3-%{srcname}-ext-flask
 Summary:        OpenTelemetry Flask Tracing
-%{?python_provide:%python_provide python3-%{srcname}-ext-flask}
+%py_provides python3-%{srcname}-ext-flask
 
 %description -n python3-%{srcname}-ext-flask
 This library builds on the OpenTelemetry WSGI middleware to track web requests
@@ -125,7 +124,7 @@ in Flask applications.
 
 %package -n python3-%{srcname}-ext-grpc
 Summary:        OpenTelemetry gRPC Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-grpc}
+%py_provides python3-%{srcname}-ext-grpc
 
 %description -n python3-%{srcname}-ext-grpc
 Client and server interceptors for gRPC Python.
@@ -133,7 +132,7 @@ Client and server interceptors for gRPC Python.
 
 %package -n python3-%{srcname}-ext-jaeger
 Summary:        OpenTelemetry Jaeger Exporter
-%{?python_provide:%python_provide python3-%{srcname}-ext-jaeger}
+%py_provides python3-%{srcname}-ext-jaeger
 
 %description -n python3-%{srcname}-ext-jaeger
 his library allows to export tracing data to Jaeger.
@@ -141,7 +140,7 @@ his library allows to export tracing data to Jaeger.
 
 %package -n python3-%{srcname}-ext-jinja2
 Summary:        OpenTelemetry jinja2 integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-jinja2}
+%py_provides python3-%{srcname}-ext-jinja2
 
 %description -n python3-%{srcname}-ext-jinja2
 %{summary}.
@@ -149,7 +148,7 @@ Summary:        OpenTelemetry jinja2 integration
 
 %package -n python3-%{srcname}-ext-mysql
 Summary:        OpenTelemetry MySQL Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-mysql}
+%py_provides python3-%{srcname}-ext-mysql
 
 %description -n python3-%{srcname}-ext-mysql
 Integration with MySQL that supports the mysql-connector library and is
@@ -158,7 +157,7 @@ specified to trace_integration using MySQL.
 
 %package -n python3-%{srcname}-ext-opencensusexporter
 Summary:        OpenCensus Exporter
-%{?python_provide:%python_provide python3-%{srcname}-ext-opencensusexporter}
+%py_provides python3-%{srcname}-ext-opencensusexporter
 
 %description -n python3-%{srcname}-ext-opencensusexporter
 This library allows to export traces and metrics using OpenCensus.
@@ -166,7 +165,7 @@ This library allows to export traces and metrics using OpenCensus.
 
 # %%package -n python3-%%{srcname}-ext-opentracing-shim
 # Summary:        OpenTracing Shim for OpenTelemetry
-# %%{?python_provide:%%python_provide python3-%%{srcname}-ext-opentracing-shim}
+# %%py_provides python3-%%{srcname}-ext-opentracing-shim
 
 # %%description -n python3-%%{srcname}-ext-opentracing-shim
 # %%{summary}.
@@ -174,7 +173,7 @@ This library allows to export traces and metrics using OpenCensus.
 
 %package -n python3-%{srcname}-ext-prometheus
 Summary:        OpenTelemetry Prometheus Exporter
-%{?python_provide:%python_provide python3-%{srcname}-ext-prometheus}
+%py_provides python3-%{srcname}-ext-prometheus
 
 %description -n python3-%{srcname}-ext-prometheus
 This library allows to export metrics data to Prometheus.
@@ -182,7 +181,7 @@ This library allows to export metrics data to Prometheus.
 
 %package -n python3-%{srcname}-ext-psycopg2
 Summary:        OpenTelemetry Psycopg Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-psycopg2}
+%py_provides python3-%{srcname}-ext-psycopg2
 
 %description -n python3-%{srcname}-ext-psycopg2
 %{summary}.
@@ -190,7 +189,7 @@ Summary:        OpenTelemetry Psycopg Integration
 
 %package -n python3-%{srcname}-ext-pymongo
 Summary:        OpenTelemetry pymongo Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-pymongo}
+%py_provides python3-%{srcname}-ext-pymongo
 
 %description -n python3-%{srcname}-ext-pymongo
 %{summary}.
@@ -198,7 +197,7 @@ Summary:        OpenTelemetry pymongo Integration
 
 %package -n python3-%{srcname}-ext-pymysql
 Summary:        OpenTelemetry PyMySQL integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-pymysql}
+%py_provides python3-%{srcname}-ext-pymysql
 
 %description -n python3-%{srcname}-ext-pymysql
 %{summary}.
@@ -206,7 +205,7 @@ Summary:        OpenTelemetry PyMySQL integration
 
 %package -n python3-%{srcname}-ext-redis
 Summary:        OpenTelemetry Redis Instrumentation
-%{?python_provide:%python_provide python3-%{srcname}-ext-redis}
+%py_provides python3-%{srcname}-ext-redis
 
 %description -n python3-%{srcname}-ext-redis
 This library allows tracing requests made by the Redis library.
@@ -214,7 +213,7 @@ This library allows tracing requests made by the Redis library.
 
 %package -n python3-%{srcname}-ext-requests
 Summary:        OpenTelemetry requests Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-requests}
+%py_provides python3-%{srcname}-ext-requests
 
 %description -n python3-%{srcname}-ext-requests
 This library allows tracing HTTP requests made by the requests library.
@@ -222,7 +221,7 @@ This library allows tracing HTTP requests made by the requests library.
 
 %package -n python3-%{srcname}-ext-sqlalchemy
 Summary:        OpenTelemetry SQLAlchemy Tracing
-%{?python_provide:%python_provide python3-%{srcname}-ext-sqlalchemy}
+%py_provides python3-%{srcname}-ext-sqlalchemy
 
 %description -n python3-%{srcname}-ext-sqlalchemy
 This library allows tracing requests made by the SQLAlchemy library.
@@ -230,7 +229,7 @@ This library allows tracing requests made by the SQLAlchemy library.
 
 %package -n python3-%{srcname}-ext-sqlite3
 Summary:        OpenTelemetry SQLite3 Integration
-%{?python_provide:%python_provide python3-%{srcname}-ext-sqlite3}
+%py_provides python3-%{srcname}-ext-sqlite3
 
 %description -n python3-%{srcname}-ext-sqlite3
 %{summary}.
@@ -238,7 +237,7 @@ Summary:        OpenTelemetry SQLite3 Integration
 
 %package -n python3-%{srcname}-ext-wsgi
 Summary:        OpenTelemetry WSGI Middleware
-%{?python_provide:%python_provide python3-%{srcname}-ext-wsgi}
+%py_provides python3-%{srcname}-ext-wsgi
 
 %description -n python3-%{srcname}-ext-wsgi
 This library provides a WSGI middleware that can be used on any WSGI framework
@@ -247,7 +246,7 @@ This library provides a WSGI middleware that can be used on any WSGI framework
 
 %package -n python3-%{srcname}-ext-zipkin
 Summary:        OpenTelemetry Zipkin Exporter
-%{?python_provide:%python_provide python3-%{srcname}-ext-zipkin}
+%py_provides python3-%{srcname}-ext-zipkin
 
 %description -n python3-%{srcname}-ext-zipkin
 This library allows to export tracing data to Zipkin.
@@ -255,10 +254,6 @@ This library allows to export tracing data to Zipkin.
 
 %package doc
 Summary:        Documentation for %{name}
-Requires:       google-roboto-slab-fonts
-Requires:       lato-fonts
-Requires:       fontawesome-fonts
-Requires:       fontawesome-fonts-web
 
 %description doc
 This package provides documentation for %{name}.
@@ -304,26 +299,6 @@ for i in $(find . -name "setup.py" -not -path "./tests/*" -not -path "./docs/*")
     %py3_install
     popd
 done
-
-# Drop bundled web fonts in HTML documentation
-pushd ./docs/_build/html/_static/fonts/
-rm fontawesome-webfont.*
-ln -s %{_fontbasedir}/fontawesome/fontawesome-webfont.* .
-
-pushd Lato/
-rm *.ttf
-for i in Bold BoldItalic Italic Regular; do
-    ln -s %{_fontbasedir}/lato/Lato-$i.ttf lato-${i,,}.ttf
-done
-popd
-
-pushd RobotoSlab/
-rm *.ttf
-for i in Bold Regular; do
-    ln -s %{_fontbasedir}/google-roboto-slab/RobotoSlab-$i.ttf roboto-slab-v7-${i,,}.ttf
-done
-popd
-popd
 
 
 %check
@@ -541,6 +516,9 @@ done
 
 
 %changelog
+* Sat Feb 13 2021 Mohamed El Morabity <melmorabity@fedoraproject.org> - 0.8.0-5
+- Fix documentation build with new RTD theme (RHBZ #1919861)
+
 * Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
