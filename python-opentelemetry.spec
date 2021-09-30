@@ -1,9 +1,15 @@
+# Sphinx-generated HTML documentation is not suitable for packaging; see
+# https://bugzilla.redhat.com/show_bug.cgi?id=2006555 for discussion.
+#
+# We can generate PDF documentation as a lesser substitute.
+%bcond_without doc_pdf
+
 %global srcname opentelemetry
 %global _description %{summary}.
 
 Name:           python-%{srcname}
 Version:        0.8.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        The OpenTelemetry Python client
 
 License:        ASL 2.0
@@ -36,10 +42,15 @@ BuildRequires:  %{py3_dist sqlalchemy}
 BuildRequires:  %{py3_dist thrift}
 BuildRequires:  %{py3_dist wrapt}
 # Required for documentation
+%if %{with doc_pdf}
 BuildRequires:  make
+BuildRequires:  python3-sphinx-latex
+BuildRequires:  latexmk
 BuildRequires:  %{py3_dist sphinx}
 BuildRequires:  %{py3_dist sphinx-autodoc-typehints}
 BuildRequires:  %{py3_dist sphinx-rtd-theme}
+%endif
+
 BuildArch:      noarch
 
 %description
@@ -289,8 +300,10 @@ for i in $(find . -name "setup.py" -not -path "./tests/*" -not -path "./docs/*")
 done
 
 # Build documentation
-%make_build -C docs/ html
-rm docs/_build/html/.??*
+%if %{with doc_pdf}
+%make_build -C docs latex SPHINXOPTS='%{?_smp_mflags}'
+%make_build -C docs/_build/latex
+%endif
 
 
 %install
@@ -511,11 +524,16 @@ done
 
 
 %files doc
-%doc docs/_build/html/
 %license LICENSE
+%if %{with doc_pdf}
+%doc docs/_build/latex/opentelemetrypython.pdf
+%endif
 
 
 %changelog
+* Thu Sep 30 2021 Benjamin A. Beasley <code@musicinmybrain.net> - 0.8.0-6
+- Generate PDF instead of HTML Sphinx documentation
+
 * Sat Feb 13 2021 Mohamed El Morabity <melmorabity@fedoraproject.org> - 0.8.0-5
 - Fix documentation build with new RTD theme (RHBZ #1919861)
 
