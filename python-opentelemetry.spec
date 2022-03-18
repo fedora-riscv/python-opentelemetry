@@ -48,254 +48,43 @@ Patch0:         %{url}/pull/2525.patch
 # https://github.com/open-telemetry/opentelemetry-python/pull/2526
 Patch1:         %{url}/pull/2526.patch
 
-BuildRequires:  python3-devel
-# opentelemetry-exporter-opencensus install_requires: setuptools >= 16.0
-# opentelemetry-api install_requires: setuptools >= 16.0
-# opentelemetry-sdk install_requires: setuptools >= 16.0
-BuildRequires:  %{py3_dist setuptools} >= 16
+BuildArch:      noarch
 
-# Documentation
+BuildRequires:  python3-devel
+
 %if %{with doc_pdf}
 BuildRequires:  make
 BuildRequires:  python3-sphinx-latex
 BuildRequires:  latexmk
 %endif
 
-# opentelemetry-proto install_requires: aiocontextvars; python_version<'3.7'
-
-# opentelemetry-exporter-otlp-proto-grpc install_requires: backoff ~= 1.10.0
-# opentelemetry-exporter-otlp-proto-http install_requires: backoff ~= 1.10.0
-BuildRequires:  ((%{py3_dist backoff} >= 1.10) with (%{py3_dist backoff} < 1.11))
-
-# dev-requirements.txt: black~=20.8b1
-# (formatters/linters/typecheckers/coverage omitted)
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: ddtrace>=0.34.0
-# (mentioned in a README but does not seem to actually be used anywhere)
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: Deprecated>=1.2.6
-# opentelemetry-proto install_requires: Deprecated >= 1.2.6
-# opentelemetry-propagator-b3 install_requires: deprecated >= 1.2.6
-# opentelemetry-opentracing-shim install_requires: Deprecated >= 1.2.6
-BuildRequires:  %{py3_dist Deprecated} >= 1.2.6
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: django>=2.2
-BuildRequires:  %{py3_dist django} >= 2.2
-
-# dev-requirements.txt: flake8~=3.7
-# (formatters/linters/typecheckers/coverage omitted)
-
-# tox.ini testenv.deps: opentelemetry: flaky
-BuildRequires:  %{py3_dist flaky}
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: flask~=1.0
-# opentelemetry-test-utils extras_require[test]: flask~=1.0
-# NOTE: We must loosen this to allow flask~=2.0.
-BuildRequires:  ((%{py3_dist flask} >= 1) with (%{py3_dist flask} < 3))
-
-# opentelemetry-exporter-jaeger-proto-grpc install_requires:
-#   googleapis-common-protos ~= 1.52
-# opentelemetry-exporter-otlp-proto-grpc install_requires:
-#   googleapis-common-protos ~= 1.52
-# opentelemetry-exporter-otlp-proto-http install_requires:
-#   googleapis-common-protos ~= 1.52
-BuildRequires:  ((%{py3_dist googleapis-common-protos} >= 1.52) with (%{py3_dist googleapis-common-protos} < 2))
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: grpcio~=1.27
-# opentelemetry-exporter-jaeger-proto-grpc install_requires:
-#   grpcio >= 1.0.0, < 2.0.0
-# opentelemetry-exporter-opencensus install_requires: grpcio >= 1.0.0, < 2.0.0
-# opentelemetry-exporter-otlp-proto-grpc install_requires:
-#   grpcio >= 1.0.0, < 2.0.0
-BuildRequires:  ((%{py3_dist grpcio} >= 1.27) with (%{py3_dist grpcio} < 2))
-
-# dev-requirements.txt: grpcio-tools~=1.41.0
-# (needed only if we run scripts/proto_codegen.sh)
-
-# dev-requirements.txt: httpretty~=1.0
-# (does not seem to actually be used anywhere)
-
-# dev-requirements.txt: isort~=5.8
-# (formatters/linters/typecheckers/coverage omitted)
-
-# dev-requirements.txt: mypy-protobuf~=3.0.0
-# (formatters/linters/typecheckers/coverage omitted)
-
-# dev-requirements.txt: mypy==0.812
-# (formatters/linters/typecheckers/coverage omitted)
-
-# opentelemetry-exporter-opencensus install_requires:
-#   opencensus-proto >= 0.1.0, < 1.0.0
-BuildRequires:  ((%{py3_dist opencensus-proto} >= 0.1) with (%{py3_dist opencensus-proto} < 1))
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: opentracing~=2.2.0
-# opentelemetry-opentracing-shim install_requires: opentracing ~= 2.0
-# opentelemetry-opentracing-shim extras_require[test]: opentracing ~= 2.2.0
-# NOTE: We must loosen this to allow opentracing 2.3.0 and 2.4.0.
-BuildRequires:  ((%{py3_dist opentracing} >= 2.2) with (%{py3_dist opentracing} < 2.5))
-
-# opentelemetry-exporter-prometheus install_requires:
-#   prometheus_client >= 0.5.0, < 1.0.0
-BuildRequires:  ((%{py3_dist prometheus_client} >= 0.5) with (%{py3_dist prometheus_client} < 1))
-
-# dev-requirements.txt: protobuf>=3.18.1
-# (possibly needed only if we run scripts/proto_codegen.sh?)
-# opentelemetry-proto install_requires: protobuf>=3.13.0
-# opentelemetry-exporter-opencensus install_requires: protobuf >= 3.13.0
-# opentelemetry-exporter-zipkin-proto-http install_requires: protobuf >= 3.12
-BuildRequires:  %{py3_dist protobuf} >= 3.18.1
-
-# dev-requirements.txt: pylint==2.7.1
-# (formatters/linters/typecheckers/coverage omitted)
-
-# dev-requirements.txt: pytest-cov>=2.8
-# (formatters/linters/typecheckers/coverage omitted)
-
-# dev-requirements.txt: pytest>=6.0
-# tox.ini testenv.deps: test: pytest
-BuildRequires:  %{py3_dist pytest} >= 6
-
-# tox.ini testenv.deps: test: pytest-benchmark
-BuildRequires:  %{py3_dist pytest-benchmark}
-
-# opentelemetry-exporter-otlp-proto-grpc extras_require[test]: pytest-grpc
-BuildRequires:  %{py3_dist pytest-grpc}
-
-# dev-requirements.txt: readme-renderer~=24.0
-# (does not seem to actually be used anywhere)
-
-# opentelemetry-exporter-zipkin-json install_requires: requests ~= 2.7
-# opentelemetry-exporter-zipkin-proto-http install_requires: requests ~= 2.7
-# opentelemetry-exporter-otlp-proto-http install_requires: requests ~= 2.7
-BuildRequires:  ((%{py3_dist requests} >= 2.7) with (%{py3_dist requests} < 3))
-
-# dev-requirements.txt: sphinx-autodoc-typehints~=1.12.0
-# docs-requirements.txt: sphinx-autodoc-typehints~=1.12.0
-# NOTE: We must loosen this to allow sphinx-autodoc-typehints~=1.12.
-BuildRequires:  ((%{py3_dist sphinx-autodoc-typehints} >= 1.12) with (%{py3_dist sphinx-autodoc-typehints} < 2))
-
-# dev-requirements.txt: sphinx-rtd-theme~=0.5
-# docs-requirements.txt: sphinx-rtd-theme~=0.5
-# NOTE: We must loosen this to allow sphinx-rtd-theme~=1.0.
-# HOWEVER: we do not build the HTML documentation, so we can do without.
-
-# dev-requirements.txt: sphinx~=3.5.4
-# docs-requirements.txt: sphinx~=3.5.4
-# NOTE: We must loosen this to allow Sphinx 3.6+ and 4.x.
-BuildRequires:  ((%{py3_dist sphinx} >= 3.5.4) with (%{py3_dist sphinx} < 5))
-
-# docs-requirements.txt: # used to generate docs for the website
-# docs-requirements.txt: sphinx-jekyll-builder
-# (omitted; we will not build website docs)
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: thrift>=0.10.0
-# opentelemetry-exporter-jaeger-thrift install_requires: thrift >= 0.10.0
-BuildRequires:  %{py3_dist thrift} >= 0.10
-
-# opentelemetry-sdk install_requires: typing-extensions >= 3.7.4
-BuildRequires:  %{py3_dist typing-extensions} >= 3.7.4
-
-# docs-requirements.txt: # Required by instrumentation and exporter packages
-# docs-requirements.txt: wrapt>=1.0.0,<2.0.0
-# Now that instrumentation is moved to contrib, this is no longer used
-# directly. (It is a dependency for some examples, and is in the intersphinx
-# mapping, which we don’t use since the build is offline, for the docs.)
-# BuildRequires:  ((%%{py3_dist wrapt} >= 1) with (%%{py3_dist wrapt} < 2))
-
-# docs-requirements.txt: # Need to install the api/sdk in the venv for
-#   autodoc. Modifying sys.path
-# docs-requirements.txt: # doesn't work for pkg_resources.
-# docs-requirements.txt: ./opentelemetry-api
-# opentelemetry-sdk install_requires: opentelemetry-api == %%{stable_version}
-# opentelemetry-propagator-b3 install_requires: opentelemetry-api ~= 1.3
-# opentelemetry-propagator-jaeger install_requires: opentelemetry-api ~= 1.3
-# opentelemetry-exporter-jaeger-proto-grpc install_requires:
-#   opentelemetry-api ~= 1.3
-# opentelemetry-exporter-jaeger-thrift install_requires:
-#   opentelemetry-api ~= 1.3
-# opentelemetry-exporter-opencensus install_requires: opentelemetry-api ~= 1.3
-# opentelemetry-exporter-otlp-proto-grpc install_requires:
-#   opentelemetry-api ~= 1.3
-# opentelemetry-exporter-otlp-proto-http install_requires:
-#   opentelemetry-api ~= 1.3
-# opentelemetry-exporter-prometheus install_requires:
-#   opentelemetry-api >= 1.10.0
-# opentelemetry-exporter-zipkin-json install_requires:
-#   opentelemetry-api ~= 1.3
-# opentelemetry-exporter-zipkin-proto-http install_requires:
-#   opentelemetry-api ~= 1.3
-# opentelemetry-opentracing-shim install_requires: opentelemetry-api ~= 1.3
-# opentelemetry-test-utils install_requires: opentelemetry-api ~= 1.3
-
-# opentelemetry-exporter-otlp-proto-grpc install_requires:
-#   opentelemetry-proto == %%{stable_version}
-# opentelemetry-exporter-otlp-proto-http install_requires:
-#   opentelemetry-proto == %%{stable_version}
-
-# docs-requirements.txt: # Need to install the api/sdk in the venv for
-#   autodoc. Modifying sys.path
-# docs-requirements.txt: # doesn't work for pkg_resources.
-# docs-requirements.txt: ./opentelemetry-sdk
-# opentelemetry-exporter-jaeger-proto-grpc install_requires:
-#   opentelemetry-sdk ~= 1.3
-# opentelemetry-exporter-opencensus install_requires: opentelemetry-sdk ~= 1.3
-# opentelemetry-exporter-otlp-proto-grpc install_requires:
-#   opentelemetry-sdk ~= 1.10.0
-# opentelemetry-exporter-otlp-proto-http install_requires:
-#   opentelemetry-sdk ~= 1.3
-# opentelemetry-exporter-prometheus install_requires:
-#   opentelemetry-sdk >= 1.10.0
-# opentelemetry-exporter-zipkin-json install_requires:
-#   opentelemetry-sdk ~= 1.3
-# opentelemetry-exporter-jaeger-thrift install_requires:
-#   opentelemetry-sdk ~= 1.3
-# opentelemetry-exporter-zipkin-proto-http install_requires:
-#   opentelemetry-sdk ~= 1.3
-# opentelemetry-test-utils install_requires: opentelemetry-sdk ~= 1.3
-
-# docs-requirements.txt: # Need to install the api/sdk in the venv for
-#   autodoc. Modifying sys.path
-# docs-requirements.txt: # doesn't work for pkg_resources.
-# docs-requirements.txt: ./opentelemetry-semantic-conventions
-# opentelemetry-sdk install_requires:
-#   opentelemetry-semantic-conventions == %%{prerel_version}
-
-# opentelemetry-exporter-jaeger install_requires:
-#   opentelemetry-exporter-jaeger-proto-grpc == %%{stable_version}
-
-# opentelemetry-exporter-jaeger install_requires:
-#   opentelemetry-exporter-jaeger-thrift == %%{stable_version}
-
-# opentelemetry-exporter-otlp install_requires:
-#   opentelemetry-exporter-otlp-proto-grpc == %%{stable_version}
-
-# opentelemetry-exporter-otlp install_requires:
-#   opentelemetry-exporter-otlp-proto-http == %%{stable_version}
-
-# opentelemetry-exporter-zipkin-proto-http install_requires:
-#   opentelemetry-exporter-zipkin-json == %%{stable_version}
-# opentelemetry-exporter-zipkin install_requires:
-#   opentelemetry-exporter-zipkin-json == %%{stable_version}
-
-# opentelemetry-exporter-zipkin install_requires:
-#   opentelemetry-exporter-zipkin-proto-http == %%{stable_version}
-
-# opentelemetry-opentracing-shim extras_require[test]:
-#   opentelemetry-test-utils == %%{prerel_version}
-
-BuildArch:      noarch
-
-%global stable_eggversion %(echo '%{stable_version}' | tr -d '~^')
-%global stable_egginfo %{stable_eggversion}-py%{python3_version}.egg-info
-%global prerel_eggversion %(echo '%{prerel_version}' | tr -d '~^')
-%global prerel_egginfo %{prerel_eggversion}-py%{python3_version}.egg-info
+%global stable_distversion %(echo '%{stable_version}' | tr -d '~^')
+%global stable_distinfo %{stable_distversion}.dist-info
+# See eachdist.ini:
+%global stable_pkgdirs %{shrink:
+      opentelemetry-api
+      opentelemetry-sdk
+      opentelemetry-proto
+      propagator/opentelemetry-propagator-jaeger
+      propagator/opentelemetry-propagator-b3
+      exporter/opentelemetry-exporter-zipkin-proto-http
+      exporter/opentelemetry-exporter-zipkin-json
+      exporter/opentelemetry-exporter-zipkin
+      exporter/opentelemetry-exporter-prometheus
+      exporter/opentelemetry-exporter-otlp
+      exporter/opentelemetry-exporter-otlp-proto-grpc
+      exporter/opentelemetry-exporter-otlp-proto-http
+      exporter/opentelemetry-exporter-jaeger-thrift
+      exporter/opentelemetry-exporter-jaeger-proto-grpc
+      exporter/opentelemetry-exporter-jaeger}
+%global prerel_distversion %(echo '%{prerel_version}' | tr -d '~^')
+%global prerel_distinfo %{prerel_distversion}.dist-info
+# See eachdist.ini:
+%global prerel_pkgdirs %{shrink:
+      tests/opentelemetry-test-utils
+      exporter/opentelemetry-exporter-opencensus
+      shim/opentelemetry-opentracing-shim
+      opentelemetry-semantic-conventions}
 
 %global common_description %{expand:
 OpenTelemetry Python API and SDK.}
@@ -679,114 +468,147 @@ sed -r -i 's|shutil\.which\("python"\)|"%{python3}"|' \
 # documentation packages.
 echo 'intersphinx_mapping.clear()' >> docs/conf.py
 
+(
+  # - We do not use formatters/linters/type-checkers/coverage.
+  #
+  # - ddtrace is mentioned in a README but does not seem to actually be used
+  #   anywhere
+  # - we do not need sphinx_rtd_theme because we are not building the
+  #   documentation as HTML
+  # - we do not need sphinx-jekyll-builder because we will not build website
+  #   docs
+  # - now that instrumentation is moved to contrib, wrapt is no longer used
+  #   directly; it is a dependency for some examples, and is in the intersphinx
+  #   mapping, which we don’t use since the build is offline
+  #
+  # - grpcio-tools is needed only if we run scripts/proto_codegen.sh
+  # - httpretty does not seem to actually be used anywhere; it may be an
+  #   optional dependency for output from some linter
+  # - readme-renderer is needed only if we run
+  #   scripts/check_for_valid_readme.py
+  #
+  # - we must allow Flask 2.x, as in opentelemetry-test-utils
+  #
+  # - we must allow Sphinx 3.6+ and 4.x
+  # - we must allow sphinx-autodoc-typehints 1.17
+  # - we must allow opentracing 2.3.x and 2.4.x
+  # - we must allow protobuf 3.19.x
+  #
+  # - upstream pins markupsafe==2.0.1:
+  #     temporary fix. we should update the jinja, flask deps
+  #     See https://github.com/pallets/markupsafe/issues/282
+  #     breaking change introduced in markupsafe causes jinja, flask to break
+  #   but we have no such luxury
+  sed -r \
+      -e '/\b(black|flake8|isort|mypy|mypy-protobuf|pylint|pytest-cov)\b/d' \
+      -e '/\b(ddtrace|sphinx-(rtd-theme|jekyll-builder)|wrapt)\b/d' \
+      -e '/\b(grpcio-tools|httpretty|readme-renderer)\b/d' \
+      -e 's/\b(flask~=)1\.[[:digit:]]\b/\12\.0/' \
+      -e 's/\b(sphinx(-autodoc-typehints)?|opentracing|protobuf)~=/\1>=/' \
+      -e 's/\b(markupsafe)==.*/\1/' \
+      dev-requirements.txt %{?with_doc_pdf:docs-requirements.txt}
+
+  # We can’t easily use %%pyproject_buildrequires -t to read tox.ini, since
+  # it’s not associated with a particular package in the source archive, but we
+  # can read out the relevant dependencies and dump them into the requirements
+  # file for processing.
+  '%{python3}' -c '
+from configparser import ConfigParser
+
+toxfile = "tox.ini"
+cfg = ConfigParser()
+if toxfile not in cfg.read(toxfile):
+    raise SystemExit(f"Could not load {toxfile}")
+for dep in cfg.get("testenv", "deps").splitlines():
+    parts = dep.rstrip("\r\n").split(None, 2)
+    if not parts or parts[0].startswith("-"):
+        continue
+    elif not parts[0].endswith(":"):
+        raise ValueError(f"Confusing dependency: {dep!r}")
+    command = parts[0][:-1]
+    dep = parts[1]
+    if any(what in command for what in ("cov", "mypy")):
+        continue
+    print(dep)
+'
+) | sed -r -e '/^#/d' -e '/^(.*\/)?opentelemetry-/d' | sort -u |
+  tee requirements-filtered.txt
+
+# Loosen any dependency versions that are pinned too tightly in subpackages.
+# The find-then-modify pattern keeps us from discarding mtimes on sources that
+# do not need modification.
+#
+# - we must allow opentracing 2.3.x and 2.4.x
+for dep in 'opentracing'
+do
+  find . -type f -name 'setup.cfg' -exec gawk -vDEP="${dep}" \
+      'NF==3 && $1==DEP && $2=="~=" { print FILENAME; nextfile }' '{}' '+' |
+    xargs -r -t sed -r -i "s/\b(${DEP}[[:blank:]])~=/\\1>=/"
+done
+
+
+%generate_buildrequires
+# We filter generated BR’s to avoid listing those that are provided by packages
+# built in this spec file. For easier inspection, we also reorder and
+# de-duplicate them.
+(
+  # Consolidated from dev-requirements.txt and docs-requirements.txt in %%prep,
+  # with quite a bit of well-justified filtering and adjusting. We will tack it
+  # onto each %%pyproject_buildrequires call.
+  reqs="${PWD}/requirements-filtered.txt"
+
+  for pkgdir in %{?with_prerelease:%{prerel_pkgdirs}} %{stable_pkgdirs}
+  do
+    pushd "${pkgdir}" >/dev/null
+    if [[ "${pkgdir}" = 'exporter/opentelemetry-exporter-otlp' ]]
+    then
+      # No “test” extra:
+      %pyproject_buildrequires -r
+    else
+      # Typical subpackage:
+      %pyproject_buildrequires -x test "${reqs}"
+    fi
+    popd >/dev/null
+  done
+) | sort -u
+
 
 %build
-# Since we will need all of the Python packages for the documentation build, we
-# do a temporary install of the built packages into a local directory, and add
-# it to the PYTHONPATH.
-PYROOT="${PWD}/%{_vpath_builddir}/pyroot"
-if [ -n "${PYTHONPATH-}" ]; then PYTHONPATH="${PYTHONPATH}:"; fi
-PYTHONPATH="${PYTHONPATH-}${PYROOT}%{python3_sitelib}"
-export PYTHONPATH
-
-# See eachdist.ini:
-for pkg in \
-%if %{with prerelease}
-    shim/opentelemetry-opentracing-shim \
-    exporter/opentelemetry-exporter-opencensus \
-    opentelemetry-semantic-conventions \
-    tests/opentelemetry-test-utils \
-%endif
-    opentelemetry-sdk \
-    opentelemetry-proto \
-    propagator/opentelemetry-propagator-jaeger \
-    propagator/opentelemetry-propagator-b3 \
-    exporter/opentelemetry-exporter-zipkin-proto-http \
-    exporter/opentelemetry-exporter-zipkin-json \
-    exporter/opentelemetry-exporter-zipkin \
-    exporter/opentelemetry-exporter-prometheus \
-    exporter/opentelemetry-exporter-otlp-proto-grpc \
-    exporter/opentelemetry-exporter-otlp-proto-http \
-    exporter/opentelemetry-exporter-otlp \
-    exporter/opentelemetry-exporter-jaeger-thrift \
-    exporter/opentelemetry-exporter-jaeger-proto-grpc \
-    exporter/opentelemetry-exporter-jaeger \
-    opentelemetry-api
+for pkgdir in %{?with_prerelease:%{prerel_pkgdirs}} %{stable_pkgdirs}
 do
-  pushd "${pkg}"
-  %py3_build
-  %{python3} %{py_setup} %{?py_setup_args} install \
-      -O1 --skip-build --root "${PYROOT}"
+  pushd "${pkgdir}"
+  %pyproject_wheel
   popd
 done
 
 # Build documentation
 %if %{with doc_pdf}
-%make_build -C docs latex SPHINXOPTS='%{?_smp_mflags}'
+PYTHONPATH="%{pyproject_build_lib}" \
+    %make_build -C docs latex SPHINXOPTS='%{?_smp_mflags}'
 %make_build -C docs/_build/latex LATEXMKOPTS='-quiet'
 %endif
 
 
 %install
-# See eachdist.ini:
-for pkg in \
-%if %{with prerelease}
-    shim/opentelemetry-opentracing-shim \
-    exporter/opentelemetry-exporter-opencensus \
-    opentelemetry-semantic-conventions \
-    tests/opentelemetry-test-utils \
-%endif
-    opentelemetry-sdk \
-    opentelemetry-proto \
-    propagator/opentelemetry-propagator-jaeger \
-    propagator/opentelemetry-propagator-b3 \
-    exporter/opentelemetry-exporter-zipkin-proto-http \
-    exporter/opentelemetry-exporter-zipkin-json \
-    exporter/opentelemetry-exporter-zipkin \
-    exporter/opentelemetry-exporter-prometheus \
-    exporter/opentelemetry-exporter-otlp-proto-grpc \
-    exporter/opentelemetry-exporter-otlp-proto-http \
-    exporter/opentelemetry-exporter-otlp \
-    exporter/opentelemetry-exporter-jaeger-thrift \
-    exporter/opentelemetry-exporter-jaeger-proto-grpc \
-    exporter/opentelemetry-exporter-jaeger \
-    opentelemetry-api
+for pkgdir in %{?with_prerelease:%{prerel_pkgdirs}} %{stable_pkgdirs}
 do
-  pushd "${pkg}"
-  %py3_install
+  pushd "${pkgdir}"
+  %pyproject_install
   popd
 done
 
 
 %check
-# Note we do not attempt to run tests for opentelemetry-test-utils, i.e.
-# tests/opentelemetry-test-utils; there are none in practice, and pytest would
-# indicate failure.
-#
-# See eachdist.ini:
-for pkg in \
-%if %{with prerelease}
-    shim/opentelemetry-opentracing-shim \
-    exporter/opentelemetry-exporter-opencensus \
-    opentelemetry-semantic-conventions \
-%endif
-    opentelemetry-sdk \
-    opentelemetry-proto \
-    propagator/opentelemetry-propagator-jaeger \
-    propagator/opentelemetry-propagator-b3 \
-    exporter/opentelemetry-exporter-zipkin-proto-http \
-    exporter/opentelemetry-exporter-zipkin-json \
-    exporter/opentelemetry-exporter-zipkin \
-    exporter/opentelemetry-exporter-prometheus \
-    exporter/opentelemetry-exporter-otlp-proto-grpc \
-    exporter/opentelemetry-exporter-otlp-proto-http \
-    exporter/opentelemetry-exporter-otlp \
-    exporter/opentelemetry-exporter-jaeger-thrift \
-    exporter/opentelemetry-exporter-jaeger-proto-grpc \
-    exporter/opentelemetry-exporter-jaeger \
-    opentelemetry-api
+for pkgdir in %{?with_prerelease:%{prerel_pkgdirs}} %{stable_pkgdirs}
 do
-  %pytest "${pkg}"
+  # Note we do not attempt to run tests for opentelemetry-test-utils, i.e.
+  # tests/opentelemetry-test-utils; there are none in practice, and pytest would
+  # indicate failure.
+  if [[ "${pkgdir}" = 'tests/opentelemetry-test-utils' ]]
+  then
+    continue
+  fi
+  %pytest "${pkgdir}"
 done
 
 
@@ -804,7 +626,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/jaeger/proto
 
 %{python3_sitelib}/opentelemetry/exporter/jaeger/proto/grpc
-%{python3_sitelib}/opentelemetry_exporter_jaeger_proto_grpc-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_jaeger_proto_grpc-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-jaeger-thrift
@@ -820,7 +642,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/jaeger
 
 %{python3_sitelib}/opentelemetry/exporter/jaeger/thrift
-%{python3_sitelib}/opentelemetry_exporter_jaeger_thrift-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_jaeger_thrift-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-jaeger
@@ -836,7 +658,7 @@ done
 
 %dir %{python3_sitelib}/opentelemetry/exporter/jaeger/__pycache__
 %pycached %{python3_sitelib}/opentelemetry/exporter/jaeger/version.py
-%{python3_sitelib}/opentelemetry_exporter_jaeger-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_jaeger-%{stable_distinfo}
 
 
 %if %{with prerelease}
@@ -851,7 +673,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter
 
 %{python3_sitelib}/opentelemetry/exporter/opencensus
-%{python3_sitelib}/opentelemetry_exporter_opencensus-%{prerel_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_opencensus-%{prerel_distinfo}
 %endif
 
 
@@ -868,7 +690,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/otlp/proto
 
 %{python3_sitelib}/opentelemetry/exporter/otlp/proto/grpc
-%{python3_sitelib}/opentelemetry_exporter_otlp_proto_grpc-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_otlp_proto_grpc-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-otlp-proto-http
@@ -884,7 +706,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/otlp/proto
 
 %{python3_sitelib}/opentelemetry/exporter/otlp/proto/http
-%{python3_sitelib}/opentelemetry_exporter_otlp_proto_http-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_otlp_proto_http-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-otlp
@@ -900,7 +722,7 @@ done
 
 %dir %{python3_sitelib}/opentelemetry/exporter/otlp/__pycache__
 %pycached %{python3_sitelib}/opentelemetry/exporter/otlp/version.py
-%{python3_sitelib}/opentelemetry_exporter_otlp-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_otlp-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-prometheus
@@ -914,7 +736,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter
 
 %{python3_sitelib}/opentelemetry/exporter/prometheus
-%{python3_sitelib}/opentelemetry_exporter_prometheus-%{prerel_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_prometheus-%{prerel_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-zipkin-json
@@ -933,7 +755,7 @@ done
 %{python3_sitelib}/opentelemetry/exporter/zipkin/encoder
 %{python3_sitelib}/opentelemetry/exporter/zipkin/json
 %pycached %{python3_sitelib}/opentelemetry/exporter/zipkin/node_endpoint.py
-%{python3_sitelib}/opentelemetry_exporter_zipkin_json-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_zipkin_json-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-zipkin-proto-http
@@ -951,7 +773,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/zipkin/proto
 
 %{python3_sitelib}/opentelemetry/exporter/zipkin/proto/http
-%{python3_sitelib}/opentelemetry_exporter_zipkin_proto_http-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_zipkin_proto_http-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-exporter-zipkin
@@ -967,7 +789,7 @@ done
 
 %dir %{python3_sitelib}/opentelemetry/exporter/zipkin/__pycache__
 %pycached %{python3_sitelib}/opentelemetry/exporter/zipkin/version.py
-%{python3_sitelib}/opentelemetry_exporter_zipkin-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_exporter_zipkin-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-api
@@ -993,7 +815,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/__pycache__
 %pycached %{python3_sitelib}/opentelemetry/environment_variables.py
 %pycached %{python3_sitelib}/opentelemetry/version.py
-%{python3_sitelib}/opentelemetry_api-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_api-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-proto
@@ -1006,7 +828,7 @@ done
 %{python3_sitelib}/opentelemetry/py.typed
 
 %{python3_sitelib}/opentelemetry/proto
-%{python3_sitelib}/opentelemetry_proto-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_proto-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-sdk
@@ -1019,7 +841,7 @@ done
 %{python3_sitelib}/opentelemetry/py.typed
 
 %{python3_sitelib}/opentelemetry/sdk
-%{python3_sitelib}/opentelemetry_sdk-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_sdk-%{stable_distinfo}
 
 
 %if %{with prerelease}
@@ -1033,7 +855,7 @@ done
 %{python3_sitelib}/opentelemetry/py.typed
 
 %{python3_sitelib}/opentelemetry/semconv
-%{python3_sitelib}/opentelemetry_semantic_conventions-%{prerel_egginfo}
+%{python3_sitelib}/opentelemetry_semantic_conventions-%{prerel_distinfo}
 %endif
 
 
@@ -1048,7 +870,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/propagators
 
 %{python3_sitelib}/opentelemetry/propagators/b3
-%{python3_sitelib}/opentelemetry_propagator_b3-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_propagator_b3-%{stable_distinfo}
 
 
 %files -n python3-opentelemetry-propagator-jaeger
@@ -1062,7 +884,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/propagators
 
 %{python3_sitelib}/opentelemetry/propagators/jaeger
-%{python3_sitelib}/opentelemetry_propagator_jaeger-%{stable_egginfo}
+%{python3_sitelib}/opentelemetry_propagator_jaeger-%{stable_distinfo}
 
 
 %if %{with prerelease}
@@ -1077,7 +899,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/shim
 
 %{python3_sitelib}/opentelemetry/shim/opentracing_shim
-%{python3_sitelib}/opentelemetry_opentracing_shim-%{prerel_egginfo}
+%{python3_sitelib}/opentelemetry_opentracing_shim-%{prerel_distinfo}
 %endif
 
 
@@ -1091,7 +913,7 @@ done
 %{python3_sitelib}/opentelemetry/py.typed
 
 %{python3_sitelib}/opentelemetry/test
-%{python3_sitelib}/opentelemetry_test_utils-%{prerel_egginfo}
+%{python3_sitelib}/opentelemetry_test_utils-%{prerel_distinfo}
 %endif
 
 
