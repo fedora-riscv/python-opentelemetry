@@ -42,11 +42,11 @@ Source1:        %{proto_url}/archive/v%{proto_version}/opentelemetry-proto-%{pro
 #
 # Fix exporter-{jaeger,otlp,zipkin} install paths
 # https://github.com/open-telemetry/opentelemetry-python/pull/2525
-Patch0:         %{url}/pull/2525.patch
+Patch:          %{url}/pull/2525.patch
 
 # Fix a mixed-up changelog entry
 # https://github.com/open-telemetry/opentelemetry-python/pull/2526
-Patch1:         %{url}/pull/2526.patch
+Patch:          %{url}/pull/2526.patch
 
 BuildArch:      noarch
 
