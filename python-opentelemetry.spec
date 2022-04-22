@@ -1,6 +1,6 @@
 # See eachdist.ini:
-%global stable_version 1.10.0
-%global prerel_version 0.29~b0
+%global stable_version 1.11.1
+%global prerel_version 0.30~b1
 # Contents of python3-opentelemetry-proto are generated from proto files in a
 # separate repository with a separate version number. We treat these as
 # generated sources: we aren’t required by the guidelines to re-generate them
@@ -8,7 +8,7 @@
 #
 # See PROTO_REPO_BRANCH_OR_COMMIT in scripts/proto_codegen.sh for the correct
 # version number.
-%global proto_version 0.12.0
+%global proto_version 0.16.0
 
 # Unfortunately, we cannot disable the prerelease packages without breaking
 # almost all of the stable packages, because opentelemetry-sdk depends on the
@@ -36,17 +36,6 @@ Source0:        %{url}/archive/v%{version}/opentelemetry-python-%{version}.tar.g
 # .proto files for python3-opentelemetry-proto, so we must include it.
 %global proto_url https://github.com/open-telemetry/opentelemetry-proto
 Source1:        %{proto_url}/archive/v%{proto_version}/opentelemetry-proto-%{proto_version}.tar.gz
-
-# Wrong installation path in exporter “convenience” packages
-# https://github.com/open-telemetry/opentelemetry-python/issues/2020
-#
-# Fix exporter-{jaeger,otlp,zipkin} install paths
-# https://github.com/open-telemetry/opentelemetry-python/pull/2525
-Patch:          %{url}/pull/2525.patch
-
-# Fix a mixed-up changelog entry
-# https://github.com/open-telemetry/opentelemetry-python/pull/2526
-Patch:          %{url}/pull/2526.patch
 
 BuildArch:      noarch
 
@@ -454,7 +443,7 @@ This package provides documentation for python-opentelemetry.
 
 
 %prep
-%autosetup -n opentelemetry-python-%{stable_version} -p1
+%autosetup -n opentelemetry-python-%{stable_version}
 
 %py3_shebang_fix .
 
@@ -499,6 +488,10 @@ echo 'intersphinx_mapping.clear()' >> docs/conf.py
   #     See https://github.com/pallets/markupsafe/issues/282
   #     breaking change introduced in markupsafe causes jinja, flask to break
   #   but we have no such luxury
+  #
+  # - upstream pins bleach==4.1.0 as a temporary fix for breaking changes in
+  #   5.0.0, but the python-bleach package in Fedora is out of date, so we must
+  #   change this to a *maximum* version
   sed -r \
       -e '/\b(black|flake8|isort|mypy|mypy-protobuf|pylint|pytest-cov)\b/d' \
       -e '/\b(ddtrace|sphinx-(rtd-theme|jekyll-builder)|wrapt)\b/d' \
@@ -506,6 +499,7 @@ echo 'intersphinx_mapping.clear()' >> docs/conf.py
       -e 's/\b(flask~=)1\.[[:digit:]]\b/\12\.0/' \
       -e 's/\b(sphinx(-autodoc-typehints)?|opentracing|protobuf)~=/\1>=/' \
       -e 's/\b(markupsafe)==.*/\1/' \
+      -e 's/\b(bleach)==(.*)/\1<=\2/' \
       dev-requirements.txt %{?with_doc_pdf:docs-requirements.txt}
 
   # We can’t easily use %%pyproject_buildrequires -t to read tox.ini, since
@@ -570,7 +564,7 @@ done
     fi
     popd >/dev/null
   done
-) | sort -u
+) | grep -vE '\bopentelemetry-' | sort -u
 
 
 %build
@@ -919,6 +913,10 @@ done
 
 %files doc
 %license LICENSE
+%doc CHANGELOG.md
+%doc CONTRIBUTING.md
+%doc rationale.md
+%doc README.md
 %if %{with doc_pdf}
 %doc docs/_build/latex/opentelemetrypython.pdf
 %endif
