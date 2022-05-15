@@ -469,19 +469,22 @@ echo 'intersphinx_mapping.clear()' >> docs/conf.py
   # - now that instrumentation is moved to contrib, wrapt is no longer used
   #   directly; it is a dependency for some examples, and is in the intersphinx
   #   mapping, which we don’t use since the build is offline
-  #
   # - grpcio-tools is needed only if we run scripts/proto_codegen.sh
   # - httpretty does not seem to actually be used anywhere; it may be an
   #   optional dependency for output from some linter
   # - readme-renderer is needed only if we run
-  #   scripts/check_for_valid_readme.py
+  #   scripts/check_for_valid_readme.py; this is also the reason for the
+  #   version-pinned dependency on bleach, so we remove that too
   #
   # - we must allow Flask 2.x, as in opentelemetry-test-utils
   #
   # - we must allow Sphinx 3.6+ and 4.x
   # - we must allow sphinx-autodoc-typehints 1.17
   # - we must allow opentracing 2.3.x and 2.4.x
-  # - we must allow protobuf 3.19.x
+  # - we must allow protobuf 3.19.x; furthermore, we are not generating the
+  #   bindings from the proto files, so we don’t have to respect the version
+  #   specification in dev-requirements.txt, only the ones in individual
+  #   packages
   #
   # - upstream pins markupsafe==2.0.1:
   #     temporary fix. we should update the jinja, flask deps
@@ -489,17 +492,18 @@ echo 'intersphinx_mapping.clear()' >> docs/conf.py
   #     breaking change introduced in markupsafe causes jinja, flask to break
   #   but we have no such luxury
   #
-  # - upstream pins bleach==4.1.0 as a temporary fix for breaking changes in
-  #   5.0.0, but the python-bleach package in Fedora is out of date, so we must
-  #   change this to a *maximum* version
+  # - if we are not building the documentation, then we should ignore
+  #   documentation dependencies duplicated in dev-requirements.txt
+  # - if we are not building the documentation, we do not need Django
   sed -r \
       -e '/\b(black|flake8|isort|mypy|mypy-protobuf|pylint|pytest-cov)\b/d' \
       -e '/\b(ddtrace|sphinx-(rtd-theme|jekyll-builder)|wrapt)\b/d' \
-      -e '/\b(grpcio-tools|httpretty|readme-renderer)\b/d' \
+      -e '/\b(grpcio-tools|httpretty|readme-renderer|bleach)\b/d' \
       -e 's/\b(flask~=)1\.[[:digit:]]\b/\12\.0/' \
-      -e 's/\b(sphinx(-autodoc-typehints)?|opentracing|protobuf)~=/\1>=/' \
+      -e 's/\b(sphinx(-autodoc-typehints)?|opentracing)~=/\1>=/' \
+      -e 's/\b(protobuf)[>~]=.*/\1/' \
       -e 's/\b(markupsafe)==.*/\1/' \
-      -e 's/\b(bleach)==(.*)/\1<=\2/' \
+      %{?!with_doc_pdf:-e '/\b(sphinx|django)\b/d'} \
       dev-requirements.txt %{?with_doc_pdf:docs-requirements.txt}
 
   # We can’t easily use %%pyproject_buildrequires -t to read tox.ini, since
