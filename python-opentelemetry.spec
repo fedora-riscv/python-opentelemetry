@@ -18,11 +18,27 @@
 # version, but currently none of these actually exist. We will avoid packaging
 # them if at all possible.
 
+%if 0%{?el9}
+%bcond_with flaky
+# https://bugzilla.redhat.com/show_bug.cgi?id=2053670
+%bcond_with thrift
+# EPEL9 lacks python3dist(sphinx-autodoc-typehints)
+# https://bugzilla.redhat.com/show_bug.cgi?id=2053664
+# …and python3dist(django)
+# https://bugzilla.redhat.com/show_bug.cgi?id=2033064
+# …and python3dist(sphinx) is older than upstream requests, which may or may
+# not be workable.
+%bcond_with doc_pdf
+%else
+%bcond_without flaky
+%bcond_without thrift
+
 # Sphinx-generated HTML documentation is not suitable for packaging; see
 # https://bugzilla.redhat.com/show_bug.cgi?id=2006555 for discussion.
 #
 # We can generate PDF documentation as a substitute.
 %bcond_without doc_pdf
+%endif
 
 Name:           python-opentelemetry
 Version:        %{stable_version}
@@ -63,7 +79,7 @@ BuildRequires:  latexmk
       exporter/opentelemetry-exporter-otlp
       exporter/opentelemetry-exporter-otlp-proto-grpc
       exporter/opentelemetry-exporter-otlp-proto-http
-      exporter/opentelemetry-exporter-jaeger-thrift
+      %{?with_thrift:exporter/opentelemetry-exporter-jaeger-thrift}
       exporter/opentelemetry-exporter-jaeger-proto-grpc
       exporter/opentelemetry-exporter-jaeger}
 %global prerel_distversion %(echo '%{prerel_version}' | tr -d '~^')
@@ -96,6 +112,7 @@ This library allows to export tracing data to Jaeger
 (https://www.jaegertracing.io/).
 
 
+%if %{with thrift}
 %package -n python3-opentelemetry-exporter-jaeger-thrift
 Summary:        Jaeger Thrift Exporter for OpenTelemetry
 Version:        %{stable_version}
@@ -108,8 +125,10 @@ Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 %description -n python3-opentelemetry-exporter-jaeger-thrift
 This library allows to export tracing data to Jaeger
 (https://www.jaegertracing.io/) using Thrift.
+%endif
 
 
+%if %{with thrift}
 %package -n python3-opentelemetry-exporter-jaeger
 Summary:        Jaeger Exporters for OpenTelemetry
 Version:        %{stable_version}
@@ -129,6 +148,7 @@ Exporters. Currently it installs:
 
 To avoid unnecessary dependencies, users should install the specific package
 once they’ve determined their preferred serialization method.
+%endif
 
 
 %if %{with prerelease}
@@ -528,7 +548,7 @@ for dep in cfg.get("testenv", "deps").splitlines():
     if any(what in command for what in ("cov", "mypy")):
         continue
     print(dep)
-'
+' %{?!with_flaky:| sed -r '/\bflaky\b/d'}
 ) | sed -r -e '/^#/d' -e '/^(.*\/)?opentelemetry-/d' | sort -u |
   tee requirements-filtered.txt
 
@@ -606,7 +626,10 @@ do
   then
     continue
   fi
-  %pytest "${pkgdir}"
+%if %{without flaky}
+  ignore='--ignore=tests/metrics/test_periodic_exporting_metric_reader.py'
+%endif
+  %pytest "${pkgdir}" ${ignore-}
 done
 
 
@@ -627,6 +650,7 @@ done
 %{python3_sitelib}/opentelemetry_exporter_jaeger_proto_grpc-%{stable_distinfo}
 
 
+%if %{with thrift}
 %files -n python3-opentelemetry-exporter-jaeger-thrift
 # Note that the contents are identical to the top-level LICENSE file.
 %license exporter/opentelemetry-exporter-jaeger-thrift/LICENSE
@@ -641,8 +665,10 @@ done
 
 %{python3_sitelib}/opentelemetry/exporter/jaeger/thrift
 %{python3_sitelib}/opentelemetry_exporter_jaeger_thrift-%{stable_distinfo}
+%endif
 
 
+%if %{with thrift}
 %files -n python3-opentelemetry-exporter-jaeger
 # Note that the contents are identical to the top-level LICENSE file.
 %license exporter/opentelemetry-exporter-jaeger/LICENSE
@@ -657,6 +683,7 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/jaeger/__pycache__
 %pycached %{python3_sitelib}/opentelemetry/exporter/jaeger/version.py
 %{python3_sitelib}/opentelemetry_exporter_jaeger-%{stable_distinfo}
+%endif
 
 
 %if %{with prerelease}
