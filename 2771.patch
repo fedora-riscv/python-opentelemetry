@@ -1,0 +1,34 @@
+From adce8822d77ba01344b103a085c5cc238128ab71 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Miro=20Hron=C4=8Dok?= <miro@hroncok.cz>
+Date: Mon, 20 Jun 2022 17:07:35 +0200
+Subject: [PATCH] Python 3.11: Enhanced error locations in tracebacks
+
+Expect ^^^^^^^^^ in tracebacks when testing them
+---
+ opentelemetry-sdk/tests/trace/test_trace.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/opentelemetry-sdk/tests/trace/test_trace.py b/opentelemetry-sdk/tests/trace/test_trace.py
+index b89734db2f..1194f24dc5 100644
+--- a/opentelemetry-sdk/tests/trace/test_trace.py
++++ b/opentelemetry-sdk/tests/trace/test_trace.py
+@@ -15,6 +15,7 @@
+ # pylint: disable=too-many-lines
+ import shutil
+ import subprocess
++import sys
+ import unittest
+ from importlib import reload
+ from logging import ERROR, WARNING
+@@ -1186,6 +1187,11 @@ def test_record_exception_context_manager(self):
+             stacktrace = """in test_record_exception_context_manager
+     raise RuntimeError("example error")
+ RuntimeError: example error"""
++            if sys.version_info >= (3, 11):
++                # https://docs.python.org/3.11/whatsnew/3.11.html#enhanced-error-locations-in-tracebacks
++                tracelines = stacktrace.splitlines()
++                tracelines.insert(-1, "    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
++                stacktrace = "\n".join(tracelines)
+             self.assertIn(stacktrace, event.attributes["exception.stacktrace"])
+ 
+         try:
