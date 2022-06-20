@@ -610,12 +610,7 @@ PYTHONPATH="%{pyproject_build_lib}" \
 
 
 %install
-for pkgdir in %{?with_prerelease:%{prerel_pkgdirs}} %{stable_pkgdirs}
-do
-  pushd "${pkgdir}"
-  %pyproject_install
-  popd
-done
+%pyproject_install
 
 
 %check
