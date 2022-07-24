@@ -53,10 +53,6 @@ Source0:        %{url}/archive/v%{version}/opentelemetry-python-%{version}.tar.g
 %global proto_url https://github.com/open-telemetry/opentelemetry-proto
 Source1:        %{proto_url}/archive/v%{proto_version}/opentelemetry-proto-%{proto_version}.tar.gz
 
-# Python 3.11: Enhanced error locations in tracebacks
-# Expect ^^^^^^^^^ in tracebacks when testing them
-Patch:          https://github.com/open-telemetry/opentelemetry-python/pull/2771.patch
-
 BuildArch:      noarch
 
 BuildRequires:  python3-devel
