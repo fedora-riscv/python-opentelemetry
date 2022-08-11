@@ -45,7 +45,7 @@ Version:        %{stable_version}
 Release:        %autorelease
 Summary:        OpenTelemetry Python API and SDK
 
-License:        ASL 2.0
+License:        Apache-2.0
 URL:            https://github.com/open-telemetry/opentelemetry-python
 Source0:        %{url}/archive/v%{version}/opentelemetry-python-%{version}.tar.gz
 # Note that we do not currently use this source, but it contains the original
