@@ -1,6 +1,6 @@
 # See eachdist.ini:
-%global stable_version 1.11.1
-%global prerel_version 0.30~b1
+%global stable_version 1.12.0
+%global prerel_version 0.33~b0
 # Contents of python3-opentelemetry-proto are generated from proto files in a
 # separate repository with a separate version number. We treat these as
 # generated sources: we aren’t required by the guidelines to re-generate them
@@ -8,7 +8,7 @@
 #
 # See PROTO_REPO_BRANCH_OR_COMMIT in scripts/proto_codegen.sh for the correct
 # version number.
-%global proto_version 0.16.0
+%global proto_version 0.17.0
 
 # Unfortunately, we cannot disable the prerelease packages without breaking
 # almost all of the stable packages, because opentelemetry-sdk depends on the
@@ -465,7 +465,15 @@ This package provides documentation for python-opentelemetry.
 
 
 %prep
-%autosetup -n opentelemetry-python-%{stable_version}
+%autosetup -p1 -n opentelemetry-python-%{stable_version}
+# In “Pin googleapis-common-protos version”,
+# https://github.com/open-telemetry/opentelemetry-python/pull/2777, upstream
+# pinned “googleapis-common-protos ~= 1.52, < 1.56.3” to work around some test
+# failures. However, we must deal with the system-wide versions of all
+# dependencies, so we will have to skip any failing tests until and unless
+# upstream is able to fix them properly.
+sed -r -i 's/(googleapis-common-protos.*), <.*/\1/' \
+    exporter/opentelemetry-exporter-jaeger-proto-grpc/setup.cfg
 
 %py3_shebang_fix .
 
@@ -826,7 +834,7 @@ done
 %{python3_sitelib}/opentelemetry/py.typed
 %dir %{python3_sitelib}/opentelemetry/propagators
 
-%{python3_sitelib}/opentelemetry/_metrics
+%{python3_sitelib}/opentelemetry/metrics
 %{python3_sitelib}/opentelemetry/attributes
 %{python3_sitelib}/opentelemetry/baggage
 %{python3_sitelib}/opentelemetry/context
