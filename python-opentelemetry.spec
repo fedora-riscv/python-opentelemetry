@@ -15,27 +15,11 @@
 # prerelease package opentelementry-semantic-conventions.
 %bcond_without prerelease
 
-%if 0%{?el9}
-%bcond_with flaky
-# https://bugzilla.redhat.com/show_bug.cgi?id=2089057
-%bcond_with backoff
-# EPEL9 lacks python3dist(sphinx-autodoc-typehints)
-# https://bugzilla.redhat.com/show_bug.cgi?id=2053664
-# …and python3dist(django)
-# https://bugzilla.redhat.com/show_bug.cgi?id=2033064
-# …and python3dist(sphinx) is older than upstream requests, which may or may
-# not be workable.
-%bcond_with doc_pdf
-%else
-%bcond_without flaky
-%bcond_without backoff
-
 # Sphinx-generated HTML documentation is not suitable for packaging; see
 # https://bugzilla.redhat.com/show_bug.cgi?id=2006555 for discussion.
 #
 # We can generate PDF documentation as a substitute.
 %bcond_without doc_pdf
-%endif
 
 Name:           python-opentelemetry
 Version:        %{stable_version}
@@ -73,9 +57,9 @@ BuildRequires:  latexmk
       exporter/opentelemetry-exporter-zipkin-json
       exporter/opentelemetry-exporter-zipkin
       exporter/opentelemetry-exporter-prometheus
-      %{?with_backoff:exporter/opentelemetry-exporter-otlp}
-      %{?with_backoff:exporter/opentelemetry-exporter-otlp-proto-grpc}
-      %{?with_backoff:exporter/opentelemetry-exporter-otlp-proto-http}
+      exporter/opentelemetry-exporter-otlp
+      exporter/opentelemetry-exporter-otlp-proto-grpc
+      exporter/opentelemetry-exporter-otlp-proto-http
       exporter/opentelemetry-exporter-jaeger-thrift
       exporter/opentelemetry-exporter-jaeger-proto-grpc
       exporter/opentelemetry-exporter-jaeger}
@@ -161,7 +145,6 @@ This library allows to export traces using OpenCensus.
 %endif
 
 
-%if %{with backoff}
 %package -n python3-opentelemetry-exporter-otlp-proto-grpc
 Summary:        OpenTelemetry Collector Protobuf over gRPC Exporter
 Version:        %{stable_version}
@@ -175,10 +158,8 @@ Requires:       python3-opentelemetry-proto = %{stable_version}-%{release}
 %description -n python3-opentelemetry-exporter-otlp-proto-grpc
 This library allows to export data to the OpenTelemetry Collector using the
 OpenTelemetry Protocol using Protobuf over gRPC.
-%endif
 
 
-%if %{with backoff}
 %package -n python3-opentelemetry-exporter-otlp-proto-http
 Summary:        OpenTelemetry Collector Protobuf over HTTP Exporter
 Version:        %{stable_version}
@@ -192,10 +173,8 @@ Requires:       python3-opentelemetry-proto = %{stable_version}-%{release}
 %description -n python3-opentelemetry-exporter-otlp-proto-http
 This library allows to export data to the OpenTelemetry Collector using the
 OpenTelemetry Protocol using Protobuf over HTTP.
-%endif
 
 
-%if %{with backoff}
 %package -n python3-opentelemetry-exporter-otlp
 Summary:        OpenTelemetry Collector Exporters
 Version:        %{stable_version}
@@ -217,7 +196,6 @@ In the future, additional packages will be available:
 
 To avoid unnecessary dependencies, users should install the specific package
 once they’ve determined their preferred serialization and protocol method.
-%endif
 
 
 %package -n python3-opentelemetry-exporter-prometheus
@@ -568,8 +546,7 @@ for dep in cfg.get("testenv", "deps").splitlines():
     if any(what in command for what in ("cov", "mypy")):
         continue
     print(dep)
-' %{?!with_flaky:| sed -r '/\bflaky\b/d'}
-) | sed -r -e '/^#/d' -e '/^(.*\/)?opentelemetry-/d' | sort -u |
+' ) | sed -r -e '/^#/d' -e '/^(.*\/)?opentelemetry-/d' | sort -u |
   tee requirements-filtered.txt
 
 # Loosen any dependency versions that are pinned too tightly in subpackages.
@@ -641,9 +618,6 @@ do
   then
     continue
   fi
-%if %{without flaky}
-  ignore='--ignore=opentelemetry-sdk/tests/metrics/test_periodic_exporting_metric_reader.py'
-%endif
   unset k
   case "${pkgdir}" in
   opentelemetry-api)
@@ -748,7 +722,6 @@ done
 %endif
 
 
-%if %{with backoff}
 %files -n python3-opentelemetry-exporter-otlp-proto-grpc
 # Note that the contents are identical to the top-level LICENSE file.
 %license exporter/opentelemetry-exporter-otlp-proto-grpc/LICENSE
@@ -764,10 +737,8 @@ done
 
 %{python3_sitelib}/opentelemetry/exporter/otlp/proto/grpc
 %{python3_sitelib}/opentelemetry_exporter_otlp_proto_grpc-%{stable_distinfo}
-%endif
 
 
-%if %{with backoff}
 %files -n python3-opentelemetry-exporter-otlp-proto-http
 # Note that the contents are identical to the top-level LICENSE file.
 %license exporter/opentelemetry-exporter-otlp-proto-http/LICENSE
@@ -783,10 +754,8 @@ done
 
 %{python3_sitelib}/opentelemetry/exporter/otlp/proto/http
 %{python3_sitelib}/opentelemetry_exporter_otlp_proto_http-%{stable_distinfo}
-%endif
 
 
-%if %{with backoff}
 %files -n python3-opentelemetry-exporter-otlp
 # Note that the contents are identical to the top-level LICENSE file.
 %license exporter/opentelemetry-exporter-otlp/LICENSE
@@ -798,7 +767,6 @@ done
 %dir %{python3_sitelib}/opentelemetry/exporter/otlp/__pycache__
 %pycached %{python3_sitelib}/opentelemetry/exporter/otlp/version.py
 %{python3_sitelib}/opentelemetry_exporter_otlp-%{stable_distinfo}
-%endif
 
 
 %files -n python3-opentelemetry-exporter-prometheus
