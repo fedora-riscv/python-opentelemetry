@@ -1,6 +1,6 @@
 # See eachdist.ini:
-%global stable_version 1.13.0
-%global prerel_version 0.34~b0
+%global stable_version 1.14.0
+%global prerel_version 0.35~b0
 # Contents of python3-opentelemetry-proto are generated from proto files in a
 # separate repository with a separate version number. We treat these as
 # generated sources: we aren’t required by the guidelines to re-generate them
@@ -463,6 +463,7 @@ This package provides documentation for python-opentelemetry.
 
 %prep
 %autosetup -p1 -n opentelemetry-python-%{stable_version}
+
 # In “Pin googleapis-common-protos version”,
 # https://github.com/open-telemetry/opentelemetry-python/pull/2777, upstream
 # pinned “googleapis-common-protos ~= 1.52, < 1.56.3” to work around some test
@@ -471,6 +472,13 @@ This package provides documentation for python-opentelemetry.
 # upstream is able to fix them properly.
 sed -r -i 's/("googleapis-common-protos.*), <[^"]*/\1/' \
     exporter/opentelemetry-exporter-jaeger-proto-grpc/pyproject.toml
+# In “Bug fix: detect and adapt to backoff package version”,
+# https://github.com/open-telemetry/opentelemetry-python/pull/2980, upstream
+# pinned test dependency “responses == 0.22.0”. While this matches the packaged
+# version in Rawhide as of this writing, we won’t be able to respect this
+# requirement in the long term, so we loosen it preemptively.
+sed -r -i 's/(responses )== /\1>= /' \
+    exporter/opentelemetry-exporter-otlp-proto-http/pyproject.toml
 
 %py3_shebang_fix .
 
@@ -521,6 +529,7 @@ echo 'intersphinx_mapping.clear()' >> docs/conf.py
   #     See https://github.com/pallets/markupsafe/issues/282
   #     breaking change introduced in markupsafe causes jinja, flask to break
   #   but we have no such luxury
+  # - we must allow pytest 7.2+ (upstream pins pytest==7.1.3)
   #
   # - if we are not building the documentation, then we should ignore
   #   documentation dependencies duplicated in dev-requirements.txt
@@ -533,7 +542,7 @@ echo 'intersphinx_mapping.clear()' >> docs/conf.py
       -e 's/\b(flask~=)1\.[[:digit:]]\b/\12\.0/' \
       -e 's/\b(sphinx(-autodoc-typehints)?|opentracing)~=/\1>=/' \
       -e 's/\b(protobuf)[>~]=.*/\1/' \
-      -e 's/\b(markupsafe)==.*/\1/' \
+      -e 's/\b(markupsafe|pytest)==.*/\1/' \
       %{?!with_doc_pdf:-e '/\b(sphinx|django)\b/d'} \
       dev-requirements.txt %{?with_doc_pdf:docs-requirements.txt}
 
@@ -636,8 +645,8 @@ do
   ignore='--ignore=opentelemetry-sdk/tests/metrics/test_periodic_exporting_metric_reader.py'
 %endif
   unset k
-  if [[ "${pkgdir}" = 'opentelemetry-api' ]]
-  then
+  case "${pkgdir}" in
+  opentelemetry-api)
     # This is some kind of metadata issue with
     # pkg_resources.iter_entry_points(). It is probably specific to the RPM
     # build environment. The entry points are found just fine if we set
@@ -655,15 +664,22 @@ do
     # E   StopIteration
     echo "Skipping tests for ${pkgdir}; see spec file comments." 1>&2
     continue
-  fi
-  if [[ "${pkgdir}" = 'opentelemetry-sdk' ]]
-  then
+    ;;
+  opentelemetry-sdk)
     # Still more entry point issues
     k="${k-}${k+ and }not (TestLoggingInit and test_logging_init_disable_default)"
     k="${k-}${k+ and }not (TestLoggingInit and test_logging_init_enable_env)"
     k="${k-}${k+ and }not (TestImportExporters and test_console_exporters)"
     k="${k-}${k+ and }not (TestGlobals and test_sdk_log_emitter_provider)"
-  fi
+    k="${k-}${k+ and }not (TestGlobals and test_sdk_logger_provider)"
+    ;;
+  exporter/opentelemetry-exporter-otlp-proto-*)
+    # Tests named test_handles_backoff_v2_api fail when backoff is <2.0
+    # https://github.com/open-telemetry/opentelemetry-python/issues/3087
+    k="${k-}${k+ and }not test_handles_backoff_v2_api"
+    ;;
+  esac
+
   %pytest "${pkgdir}" ${ignore-} -k "${k-}"
 done
 
