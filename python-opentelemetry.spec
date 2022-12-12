@@ -1,6 +1,6 @@
 # See eachdist.ini:
-%global stable_version 1.14.0
-%global prerel_version 0.35~b0
+%global stable_version 1.15.0
+%global prerel_version 0.36~b0
 # Contents of python3-opentelemetry-proto are generated from proto files in a
 # separate repository with a separate version number. We treat these as
 # generated sources: we aren’t required by the guidelines to re-generate them
@@ -543,7 +543,7 @@ for dep in cfg.get("testenv", "deps").splitlines():
         raise ValueError(f"Confusing dependency: {dep!r}")
     command = parts[0][:-1]
     dep = parts[1]
-    if any(what in command for what in ("cov", "mypy")):
+    if any(what in command for what in ("cov", "mypy", "proto4")):
         continue
     print(dep)
 ' ) | sed -r -e '/^#/d' -e '/^(.*\/)?opentelemetry-/d' | sort -u |
@@ -845,6 +845,7 @@ done
 %{python3_sitelib}/opentelemetry/py.typed
 %dir %{python3_sitelib}/opentelemetry/propagators/
 
+%{python3_sitelib}/opentelemetry/_logs/
 %{python3_sitelib}/opentelemetry/attributes/
 %{python3_sitelib}/opentelemetry/baggage/
 %{python3_sitelib}/opentelemetry/context/
