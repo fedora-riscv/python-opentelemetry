@@ -1,0 +1,100 @@
+From 420f2d95aa910074f5b9ffc7b5deb80ccd6d04cc Mon Sep 17 00:00:00 2001
+From: "Benjamin A. Beasley" <code@musicinmybrain.net>
+Date: Sun, 1 Jan 2023 11:12:53 -0500
+Subject: [PATCH] Fix tests with pre-2.0 backoff (fix #3087)
+
+---
+ .../tests/test_otlp_trace_exporter.py                         | 4 +++-
+ .../tests/metrics/test_otlp_metrics_exporter.py               | 4 +++-
+ .../tests/test_proto_log_exporter.py                          | 4 +++-
+ .../tests/test_proto_span_exporter.py                         | 4 +++-
+ 4 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py
+index 89cf7f6639..724d281f5d 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py
+@@ -25,6 +25,7 @@
+ from opentelemetry.attributes import BoundedAttributes
+ from opentelemetry.exporter.otlp.proto.grpc.exporter import (
+     _translate_key_values,
++    _is_backoff_v2,
+ )
+ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+     OTLPSpanExporter,
+@@ -461,7 +462,8 @@ def test_otlp_headers(self, mock_ssl_channel, mock_secure):
+     def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
+         # In backoff ~= 2.0.0 the first value yielded from expo is None.
+         def generate_delays(*args, **kwargs):
+-            yield None
++            if _is_backoff_v2:
++                yield None
+             yield 1
+ 
+         mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/tests/metrics/test_otlp_metrics_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-http/tests/metrics/test_otlp_metrics_exporter.py
+index 99f9ea12d3..45bc0c6faa 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/tests/metrics/test_otlp_metrics_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/tests/metrics/test_otlp_metrics_exporter.py
+@@ -25,6 +25,7 @@
+     DEFAULT_METRICS_EXPORT_PATH,
+     DEFAULT_TIMEOUT,
+     OTLPMetricExporter,
++    _is_backoff_v2,
+ )
+ from opentelemetry.sdk.environment_variables import (
+     OTEL_EXPORTER_OTLP_CERTIFICATE,
+@@ -281,7 +282,8 @@ def test_serialization(self, mock_post):
+     def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
+         # In backoff ~= 2.0.0 the first value yielded from expo is None.
+         def generate_delays(*args, **kwargs):
+-            yield None
++            if _is_backoff_v2:
++                yield None
+             yield 1
+ 
+         mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py
+index 7dcb82030d..b273a618cf 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py
+@@ -29,6 +29,7 @@
+     DEFAULT_LOGS_EXPORT_PATH,
+     DEFAULT_TIMEOUT,
+     OTLPLogExporter,
++    _is_backoff_v2,
+ )
+ from opentelemetry.exporter.otlp.proto.http._log_exporter.encoder import (
+     _encode_attributes,
+@@ -166,7 +167,8 @@ def test_serialize(self):
+     def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
+         # In backoff ~= 2.0.0 the first value yielded from expo is None.
+         def generate_delays(*args, **kwargs):
+-            yield None
++            if _is_backoff_v2:
++                yield None
+             yield 1
+ 
+         mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py
+index 73d08e08c8..64ca6fbbb8 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py
+@@ -26,6 +26,7 @@
+     DEFAULT_TIMEOUT,
+     DEFAULT_TRACES_EXPORT_PATH,
+     OTLPSpanExporter,
++    _is_backoff_v2,
+ )
+ from opentelemetry.sdk.environment_variables import (
+     OTEL_EXPORTER_OTLP_CERTIFICATE,
+@@ -203,7 +204,8 @@ def test_headers_parse_from_env(self):
+     def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
+         # In backoff ~= 2.0.0 the first value yielded from expo is None.
+         def generate_delays(*args, **kwargs):
+-            yield None
++            if _is_backoff_v2:
++                yield None
+             yield 1
+ 
+         mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
