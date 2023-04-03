@@ -1,0 +1,392 @@
+From 3eec9877d75a9305c97ae81a84900aee8a5d890f Mon Sep 17 00:00:00 2001
+From: Nick Stenning <nick@whiteink.com>
+Date: Mon, 31 Oct 2022 20:01:04 +0100
+Subject: [PATCH] Bug fix: detect and adapt to backoff package version (#2980)
+
+---
+ CHANGELOG.md                                  |  2 +-
+ .../exporter/otlp/proto/grpc/exporter.py      | 17 +++++++-
+ .../tests/logs/test_otlp_logs_exporter.py     |  4 +-
+ .../metrics/test_otlp_metrics_exporter.py     |  4 +-
+ .../tests/test_otlp_exporter_mixin.py         |  2 +-
+ .../tests/test_otlp_trace_exporter.py         | 20 ++++++++-
+ .../setup.cfg                                 |  1 +
+ .../otlp/proto/http/_log_exporter/__init__.py | 16 ++++++-
+ .../proto/http/trace_exporter/__init__.py     | 16 ++++++-
+ .../tests/test_proto_log_exporter.py          | 26 ++++++++++++
+ .../tests/test_proto_span_exporter.py         | 42 ++++++++++++++++++-
+ tox.ini                                       |  2 +-
+ 12 files changed, 136 insertions(+), 16 deletions(-)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 4db9af65..2ddec635 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
+   ([#2726](https://github.com/open-telemetry/opentelemetry-python/pull/2726))
+ - fix: frozenset object has no attribute items
+   ([#2727](https://github.com/open-telemetry/opentelemetry-python/pull/2727))
+-- fix: create suppress HTTP instrumentation key in opentelemetry context 
++- fix: create suppress HTTP instrumentation key in opentelemetry context
+   ([#2729](https://github.com/open-telemetry/opentelemetry-python/pull/2729))
+ - Support logs SDK auto instrumentation enable/disable with env
+   ([#2728](https://github.com/open-telemetry/opentelemetry-python/pull/2728))
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-grpc/src/opentelemetry/exporter/otlp/proto/grpc/exporter.py b/exporter/opentelemetry-exporter-otlp-proto-grpc/src/opentelemetry/exporter/otlp/proto/grpc/exporter.py
+index 4405bcad..aef66b79 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-grpc/src/opentelemetry/exporter/otlp/proto/grpc/exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-grpc/src/opentelemetry/exporter/otlp/proto/grpc/exporter.py
+@@ -25,7 +25,7 @@ from typing import TypeVar
+ from urllib.parse import urlparse
+ from opentelemetry.sdk.trace import ReadableSpan
+ 
+-from backoff import expo
++import backoff
+ from google.rpc.error_details_pb2 import RetryInfo
+ from grpc import (
+     ChannelCredentials,
+@@ -183,6 +183,19 @@ def _get_credentials(creds, environ_key):
+     return ssl_channel_credentials()
+ 
+ 
++# Work around API change between backoff 1.x and 2.x. Since 2.0.0 the backoff
++# wait generator API requires a first .send(None) before reading the backoff
++# values from the generator.
++_is_backoff_v2 = next(backoff.expo()) is None
++
++
++def _expo(*args, **kwargs):
++    gen = backoff.expo(*args, **kwargs)
++    if _is_backoff_v2:
++        gen.send(None)
++    return gen
++
++
+ # pylint: disable=no-member
+ class OTLPExporterMixin(
+     ABC, Generic[SDKDataT, ExportServiceRequestT, ExportResultT]
+@@ -296,7 +309,7 @@ class OTLPExporterMixin(
+         # expo returns a generator that yields delay values which grow
+         # exponentially. Once delay is greater than max_value, the yielded
+         # value will remain constant.
+-        for delay in expo(max_value=max_value):
++        for delay in _expo(max_value=max_value):
+ 
+             if delay == max_value:
+                 return self._result.FAILURE
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/logs/test_otlp_logs_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/logs/test_otlp_logs_exporter.py
+index a9c63eaa..07616090 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/logs/test_otlp_logs_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/logs/test_otlp_logs_exporter.py
+@@ -251,7 +251,7 @@ class TestOTLPLogExporter(TestCase):
+             )
+             mock_method.reset_mock()
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
+     def test_unavailable(self, mock_sleep, mock_expo):
+ 
+@@ -265,7 +265,7 @@ class TestOTLPLogExporter(TestCase):
+         )
+         mock_sleep.assert_called_with(1)
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
+     def test_unavailable_delay(self, mock_sleep, mock_expo):
+ 
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/metrics/test_otlp_metrics_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/metrics/test_otlp_metrics_exporter.py
+index 66151d09..87afde38 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/metrics/test_otlp_metrics_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/metrics/test_otlp_metrics_exporter.py
+@@ -446,7 +446,7 @@ class TestOTLPMetricExporter(TestCase):
+             )
+             mock_method.reset_mock()
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
+     def test_unavailable(self, mock_sleep, mock_expo):
+ 
+@@ -461,7 +461,7 @@ class TestOTLPMetricExporter(TestCase):
+         )
+         mock_sleep.assert_called_with(1)
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
+     def test_unavailable_delay(self, mock_sleep, mock_expo):
+ 
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_exporter_mixin.py b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_exporter_mixin.py
+index 3f44ef22..81a874af 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_exporter_mixin.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_exporter_mixin.py
+@@ -56,7 +56,7 @@ class TestOTLPExporterMixin(TestCase):
+             with self.assertRaises(InvalidCompressionValueException):
+                 environ_to_compression("test_invalid")
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     def test_export_warning(self, mock_expo):
+ 
+         mock_expo.configure_mock(**{"return_value": [0]})
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py
+index a5cb4e69..cfb286ed 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-grpc/tests/test_otlp_trace_exporter.py
+@@ -436,7 +436,23 @@ class TestOTLPSpanExporter(TestCase):
+         # pylint: disable=protected-access
+         self.assertIsNone(exporter._headers, None)
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.backoff")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
++    def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
++        # In backoff ~= 2.0.0 the first value yielded from expo is None.
++        def generate_delays(*args, **kwargs):
++            yield None
++            yield 1
++
++        mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
++
++        add_TraceServiceServicer_to_server(
++            TraceServiceServicerUNAVAILABLE(), self.server
++        )
++        self.exporter.export([self.span])
++        mock_sleep.assert_called_once_with(1)
++
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
+     def test_unavailable(self, mock_sleep, mock_expo):
+ 
+@@ -450,7 +466,7 @@ class TestOTLPSpanExporter(TestCase):
+         )
+         mock_sleep.assert_called_with(1)
+ 
+-    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.expo")
++    @patch("opentelemetry.exporter.otlp.proto.grpc.exporter._expo")
+     @patch("opentelemetry.exporter.otlp.proto.grpc.exporter.sleep")
+     def test_unavailable_delay(self, mock_sleep, mock_expo):
+ 
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/setup.cfg b/exporter/opentelemetry-exporter-otlp-proto-http/setup.cfg
+index 5df6d9dd..48bbc3ee 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/setup.cfg
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/setup.cfg
+@@ -50,6 +50,7 @@ install_requires =
+ 
+ [options.extras_require]
+ test =
++    responses == 0.22.0
+ 
+ [options.packages.find]
+ where = src
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/_log_exporter/__init__.py b/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/_log_exporter/__init__.py
+index 041f1ab3..91d727f7 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/_log_exporter/__init__.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/_log_exporter/__init__.py
+@@ -20,8 +20,8 @@ from os import environ
+ from typing import Dict, Optional, Sequence
+ from time import sleep
+ 
++import backoff
+ import requests
+-from backoff import expo
+ 
+ from opentelemetry.sdk.environment_variables import (
+     OTEL_EXPORTER_OTLP_CERTIFICATE,
+@@ -50,6 +50,18 @@ DEFAULT_ENDPOINT = "http://localhost:4318/"
+ DEFAULT_LOGS_EXPORT_PATH = "v1/logs"
+ DEFAULT_TIMEOUT = 10  # in seconds
+ 
++# Work around API change between backoff 1.x and 2.x. Since 2.0.0 the backoff
++# wait generator API requires a first .send(None) before reading the backoff
++# values from the generator.
++_is_backoff_v2 = next(backoff.expo()) is None
++
++
++def _expo(*args, **kwargs):
++    gen = backoff.expo(*args, **kwargs)
++    if _is_backoff_v2:
++        gen.send(None)
++    return gen
++
+ 
+ class OTLPLogExporter(LogExporter):
+ 
+@@ -121,7 +133,7 @@ class OTLPLogExporter(LogExporter):
+ 
+         serialized_data = _ProtobufEncoder.serialize(batch)
+ 
+-        for delay in expo(max_value=self._MAX_RETRY_TIMEOUT):
++        for delay in _expo(max_value=self._MAX_RETRY_TIMEOUT):
+ 
+             if delay == self._MAX_RETRY_TIMEOUT:
+                 return LogExportResult.FAILURE
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py b/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py
+index 6f0d6ee5..3396b9ad 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/src/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py
+@@ -20,8 +20,8 @@ from os import environ
+ from typing import Dict, Optional
+ from time import sleep
+ 
++import backoff
+ import requests
+-from backoff import expo
+ 
+ from opentelemetry.sdk.environment_variables import (
+     OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE,
+@@ -51,6 +51,18 @@ DEFAULT_ENDPOINT = "http://localhost:4318/"
+ DEFAULT_TRACES_EXPORT_PATH = "v1/traces"
+ DEFAULT_TIMEOUT = 10  # in seconds
+ 
++# Work around API change between backoff 1.x and 2.x. Since 2.0.0 the backoff
++# wait generator API requires a first .send(None) before reading the backoff
++# values from the generator.
++_is_backoff_v2 = next(backoff.expo()) is None
++
++
++def _expo(*args, **kwargs):
++    gen = backoff.expo(*args, **kwargs)
++    if _is_backoff_v2:
++        gen.send(None)
++    return gen
++
+ 
+ class OTLPSpanExporter(SpanExporter):
+ 
+@@ -132,7 +144,7 @@ class OTLPSpanExporter(SpanExporter):
+ 
+         serialized_data = _ProtobufEncoder.serialize(spans)
+ 
+-        for delay in expo(max_value=self._MAX_RETRY_TIMEOUT):
++        for delay in _expo(max_value=self._MAX_RETRY_TIMEOUT):
+ 
+             if delay == self._MAX_RETRY_TIMEOUT:
+                 return SpanExportResult.FAILURE
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py
+index d5e34b74..b376029c 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_log_exporter.py
+@@ -19,6 +19,7 @@ from typing import List, Tuple
+ from unittest.mock import MagicMock, patch
+ 
+ import requests
++import responses
+ 
+ from opentelemetry.exporter.otlp.proto.http import Compression
+ from opentelemetry.exporter.otlp.proto.http._log_exporter import (
+@@ -159,6 +160,31 @@ class TestOTLPHTTPLogExporter(unittest.TestCase):
+             _ProtobufEncoder._CONTENT_TYPE, "application/x-protobuf"
+         )
+ 
++    @responses.activate
++    @patch("opentelemetry.exporter.otlp.proto.http._log_exporter.backoff")
++    @patch("opentelemetry.exporter.otlp.proto.http._log_exporter.sleep")
++    def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
++        # In backoff ~= 2.0.0 the first value yielded from expo is None.
++        def generate_delays(*args, **kwargs):
++            yield None
++            yield 1
++
++        mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
++
++        # return a retryable error
++        responses.add(
++            responses.POST,
++            "http://logs.example.com/export",
++            json={"error": "something exploded"},
++            status=500,
++        )
++
++        exporter = OTLPLogExporter(endpoint="http://logs.example.com/export")
++        logs = self._get_sdk_log_data()
++
++        exporter.export(logs)
++        mock_sleep.assert_called_once_with(1)
++
+     @staticmethod
+     def _get_sdk_log_data() -> List[LogData]:
+         log1 = LogData(
+diff --git a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py
+index 4eb0db61..36898216 100644
+--- a/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py
++++ b/exporter/opentelemetry-exporter-otlp-proto-http/tests/test_proto_span_exporter.py
+@@ -13,9 +13,11 @@
+ # limitations under the License.
+ 
+ import unittest
+-from unittest.mock import patch
++from collections import OrderedDict
++from unittest.mock import Mock, patch
+ 
+ import requests
++import responses
+ 
+ from opentelemetry.exporter.otlp.proto.http import Compression
+ from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+@@ -37,6 +39,7 @@ from opentelemetry.sdk.environment_variables import (
+     OTEL_EXPORTER_OTLP_TRACES_HEADERS,
+     OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+ )
++from opentelemetry.sdk.trace import _Span
+ 
+ OS_ENV_ENDPOINT = "os.env.base"
+ OS_ENV_CERTIFICATE = "os/env/base.crt"
+@@ -183,3 +186,40 @@ class TestOTLPSpanExporter(unittest.TestCase):
+                 cm.records[0].message,
+                 "Header doesn't match the format: missingValue.",
+             )
++
++    # pylint: disable=no-self-use
++    @responses.activate
++    @patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.backoff")
++    @patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.sleep")
++    def test_handles_backoff_v2_api(self, mock_sleep, mock_backoff):
++        # In backoff ~= 2.0.0 the first value yielded from expo is None.
++        def generate_delays(*args, **kwargs):
++            yield None
++            yield 1
++
++        mock_backoff.expo.configure_mock(**{"side_effect": generate_delays})
++
++        # return a retryable error
++        responses.add(
++            responses.POST,
++            "http://traces.example.com/export",
++            json={"error": "something exploded"},
++            status=500,
++        )
++
++        exporter = OTLPSpanExporter(
++            endpoint="http://traces.example.com/export"
++        )
++        span = _Span(
++            "abc",
++            context=Mock(
++                **{
++                    "trace_state": OrderedDict([("a", "b"), ("c", "d")]),
++                    "span_id": 10217189687419569865,
++                    "trace_id": 67545097771067222548457157018666467027,
++                }
++            ),
++        )
++
++        exporter.export([span])
++        mock_sleep.assert_called_once_with(1)
+diff --git a/tox.ini b/tox.ini
+index 73df1f69..9a68cbdb 100644
+--- a/tox.ini
++++ b/tox.ini
+@@ -135,7 +135,7 @@ commands_pre =
+   exporter-otlp-proto-grpc: pip install {toxinidir}/exporter/opentelemetry-exporter-otlp-proto-grpc
+ 
+   exporter-otlp-proto-http: pip install {toxinidir}/opentelemetry-proto
+-  exporter-otlp-proto-http: pip install {toxinidir}/exporter/opentelemetry-exporter-otlp-proto-http
++  exporter-otlp-proto-http: pip install {toxinidir}/exporter/opentelemetry-exporter-otlp-proto-http[test]
+ 
+   exporter-jaeger-combined: pip install {toxinidir}/exporter/opentelemetry-exporter-jaeger-proto-grpc {toxinidir}/exporter/opentelemetry-exporter-jaeger-thrift {toxinidir}/exporter/opentelemetry-exporter-jaeger
+   exporter-jaeger-proto-grpc: pip install {toxinidir}/exporter/opentelemetry-exporter-jaeger-proto-grpc
+-- 
+2.39.2
+
