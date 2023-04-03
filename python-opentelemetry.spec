@@ -53,6 +53,11 @@ Source0:        %{url}/archive/v%{version}/opentelemetry-python-%{version}.tar.g
 %global proto_url https://github.com/open-telemetry/opentelemetry-proto
 Source1:        %{proto_url}/archive/v%{proto_version}/opentelemetry-proto-%{proto_version}.tar.gz
 
+# Bug fix: detect and adapt to backoff package version (#2980)
+# https://github.com/open-telemetry/opentelemetry-python/commit/370af5f5f1265107c673a556204ea0acee646f09
+# Backported to v1.12.0.
+Patch:          0001-Bug-fix-detect-and-adapt-to-backoff-package-version-.patch
+
 BuildArch:      noarch
 
 BuildRequires:  python3-devel
@@ -474,6 +479,16 @@ This package provides documentation for python-opentelemetry.
 # upstream is able to fix them properly.
 sed -r -i 's/(googleapis-common-protos.*), <.*/\1/' \
     exporter/opentelemetry-exporter-jaeger-proto-grpc/setup.cfg
+
+# In “Bug fix: detect and adapt to backoff package version”,
+# https://github.com/open-telemetry/opentelemetry-python/pull/2980, upstream
+# pinned test dependency “responses == 0.22.0”. While this matches the packaged
+# version in Rawhide as of this writing, we won’t be able to respect this
+# requirement in the long term, so we loosen it preemptively. Furthermore, EPEL9
+# has 0.18.0, which actually works fine.
+sed -r -i \
+    's/(responses )==( 0\.)22(\.[[:digit:]]+)/\1>=\218\3/' \
+    exporter/opentelemetry-exporter-otlp-proto-http/setup.cfg
 
 %py3_shebang_fix .
 
