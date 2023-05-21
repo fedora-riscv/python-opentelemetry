@@ -209,6 +209,7 @@ Version:        %{stable_version}
 
 # Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-exporter-otlp-proto-grpc = %{stable_version}-%{release}
+Requires:       python3-opentelemetry-exporter-otlp-proto-http = %{stable_version}-%{release}
 
 %description -n python3-opentelemetry-exporter-otlp
 This library is provided as a convenience to install all supported
