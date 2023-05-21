@@ -107,8 +107,7 @@ OpenTelemetry Python API and SDK.}
 Summary:        Jaeger Protobuf Exporter for OpenTelemetry
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 
@@ -121,8 +120,7 @@ This library allows to export tracing data to Jaeger
 Summary:        Jaeger Thrift Exporter for OpenTelemetry
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 
@@ -137,8 +135,7 @@ Version:        %{stable_version}
 
 Obsoletes:      python3-opentelemetry-ext-jaeger < 1.0
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-exporter-jaeger-proto-grpc = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-exporter-jaeger-thrift = %{stable_version}-%{release}
 
@@ -159,8 +156,7 @@ Version:        %{prerel_version}
 
 Obsoletes:      python3-opentelemetry-ext-opencensusexporter < 1.0
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 
@@ -174,8 +170,7 @@ This library allows to export traces using OpenCensus.
 Summary:        OpenTelemetry Collector Protobuf over gRPC Exporter
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-proto = %{stable_version}-%{release}
@@ -191,8 +186,7 @@ OpenTelemetry Protocol using Protobuf over gRPC.
 Summary:        OpenTelemetry Collector Protobuf over HTTP Exporter
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-proto = %{stable_version}-%{release}
@@ -208,8 +202,7 @@ OpenTelemetry Protocol using Protobuf over HTTP.
 Summary:        OpenTelemetry Collector Exporters
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-exporter-otlp-proto-grpc = %{stable_version}-%{release}
 
 %description -n python3-opentelemetry-exporter-otlp
@@ -235,8 +228,7 @@ Version:        %{prerel_version}
 Obsoletes:      python3-opentelemetry-ext-prometheus < 1.0
 
 Requires:       ((%{py3_dist prometheus_client} >= 0.5) with (%{py3_dist prometheus_client} < 1))
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 
@@ -249,8 +241,7 @@ This library allows to export metrics data to Prometheus
 Summary:        Zipkin Span JSON Exporter for OpenTelemetry
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 
@@ -263,8 +254,7 @@ JSON for serialization.
 Summary:        Zipkin Span Protobuf Exporter for OpenTelemetry
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-exporter-zipkin-json = %{stable_version}-%{release}
@@ -278,8 +268,7 @@ Protobuf for serialization.
 Summary:        Zipkin Span Exporters for OpenTelemetry
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-exporter-zipkin-json = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-exporter-zipkin-proto-http = %{stable_version}-%{release}
 
@@ -380,8 +369,7 @@ Version:        %{stable_version}
 Summary:        OpenTelemetry Python SDK
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-semantic-conventions = %{prerel_version}-%{release}
 
@@ -404,8 +392,7 @@ the OpenTelemetry specification.
 Summary:        OpenTelemetry B3 Propagator
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 
 %description -n python3-opentelemetry-propagator-b3
@@ -416,8 +403,7 @@ This library provides a propagator for the B3 format.
 Summary:        OpenTelemetry Jaeger Propagator
 Version:        %{stable_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 
 %description -n python3-opentelemetry-propagator-jaeger
@@ -431,8 +417,7 @@ Version:        %{prerel_version}
 
 Obsoletes:      python3-opentelemetry-ext-opentracing-shim < 1.0
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 
 %description -n python3-opentelemetry-opentracing-shim
@@ -445,8 +430,7 @@ Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Summary:        OpenTracing Test Utilities
 Version:        %{prerel_version}
 
-# Dependencies across subpackages should be fully-versioned. See comments
-# following BuildRequires for a tabulation of such interdependencies.
+# Dependencies across subpackages should be fully-versioned.
 Requires:       python3-opentelemetry-api = %{stable_version}-%{release}
 Requires:       python3-opentelemetry-sdk = %{stable_version}-%{release}
 
