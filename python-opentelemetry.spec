@@ -481,6 +481,14 @@ sed -r -i \
     exporter/opentelemetry-exporter-otlp-proto-http/setup.cfg
 
 %py3_shebang_fix .
+# These are not installed with executable permissions, so shebangs are not
+# useful:
+thriftgen='exporter/opentelemetry-exporter-jaeger-thrift/src'
+thriftgen="${thriftgen}/opentelemetry/exporter/jaeger/thrift/gen"
+sed -r -i '1{/^#!/d}' \
+    "${thriftgen}/agent/Agent-remote" \
+    "${thriftgen}/jaeger/Collector-remote" \
+    "${thriftgen}/zipkincore/ZipkinCollector-remote"
 
 # Fix a test that shells out to the unversioned Python command. This is OK
 # upstream, but not in Fedora.
